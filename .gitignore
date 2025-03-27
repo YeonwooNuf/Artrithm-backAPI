@@ -1,3 +1,6 @@
+### macOs ###
+.DS_store
+
 HELP.md
 .gradle
 build/
