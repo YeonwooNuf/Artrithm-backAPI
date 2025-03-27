@@ -1,40 +1,35 @@
-### macOs ###
-.DS_Store
+# Gradle 빌드 폴더
+/build/
+/out/
+/.gradle
 
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+# IntelliJ IDE 설정
+.idea/
 *.iml
-*.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+# Eclipse 설정
+.project
+.classpath
+.settings/
 
-### VS Code ###
-.vscode/
+# 자바 컴파일 결과물
+*.class
+
+# 환경변수 & 프로퍼티 파일
+*.env
+application-local.yml
+application-dev.yml
+application.properties
+
+# 로그 파일
+*.log
+
+# OS 파일
+.DS_Store
+Thumbs.db
+
+# Lombok 설정
+lombok.config
+
+# 테스트 결과
+/test-output/
