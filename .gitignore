@@ -19,7 +19,6 @@
 *.env
 application-local.yml
 application-dev.yml
-application.properties
 
 # 로그 파일
 *.log
