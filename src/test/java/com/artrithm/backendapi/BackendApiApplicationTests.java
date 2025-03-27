@@ -1,13 +1,13 @@
-package com.artrithm.apiserver;
+package com.artrithm.backendapi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ApiServerApplicationTests {
+class BackendApiApplicationTests {
 
-    @Test
-    void contextLoads() {
-    }
+	@Test
+	void contextLoads() {
+	}
 
 }
