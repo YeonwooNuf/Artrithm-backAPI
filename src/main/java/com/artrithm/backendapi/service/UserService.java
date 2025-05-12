@@ -6,6 +6,13 @@ import com.artrithm.backendapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +39,10 @@ public class UserService {
                 .loginId(dto.getLoginId())
                 .password(encodedPassword)
                 .nickname(dto.getNickname())
+                .birth(dto.getBirth())
                 .email(dto.getEmail())
                 .phoneNumber(dto.getPhoneNumber())
+                .role(User.Role.USER)
                 .build();
 
         return userRepository.save(user).getId();
@@ -52,8 +61,13 @@ public class UserService {
                 .id(user.getId())
                 .loginId(user.getLoginId())
                 .nickname(user.getNickname())
+                .birth(user.getBirth())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
+                .role(user.getRole().name())
+                .isArtistApproved(user.isArtistApproved())
+                .artistBio(user.getArtistBio())
+                .profileImage(user.getProfileImage())
                 .build();
     }
 
@@ -66,8 +80,57 @@ public class UserService {
                 .id(user.getId())
                 .loginId(user.getLoginId())
                 .nickname(user.getNickname())
+                .birth(user.getBirth())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
+                .role(user.getRole().name())
+                .isArtistApproved(user.isArtistApproved())
+                .artistBio(user.getArtistBio())
+                .profileImage(user.getProfileImage())
+                .build();
+    }
+
+    // ✅ 사용자 정보 수정 후 반환
+    public UserDto updateUserInfo(Long userId, UserDto dto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        user.setNickname(dto.getNickname());
+        user.setPhoneNumber(dto.getPhoneNumber());
+        user.setBirth(dto.getBirth());
+        user.setEmail(dto.getEmail());
+
+        if (user.isArtistApproved() && dto.getArtistBio() != null) {
+            user.setArtistBio(dto.getArtistBio());
+        }
+
+        MultipartFile profileFile = dto.getProfileImageFile();
+        if (profileFile != null && !profileFile.isEmpty()) {
+            try {
+                String folder = "uploads/profile-images";
+                String filename = System.currentTimeMillis() + "_" + profileFile.getOriginalFilename();
+                Path path = Paths.get(folder, filename);
+                Files.createDirectories(path.getParent());
+                profileFile.transferTo(path);
+                user.setProfileImage("/" + path.toString().replace("\\", "/"));
+            } catch (IOException e) {
+                throw new RuntimeException("프로필 이미지 저장 실패", e);
+            }
+        }
+
+        User savedUser = userRepository.save(user);
+
+        return UserDto.builder()
+                .id(savedUser.getId())
+                .loginId(savedUser.getLoginId())
+                .nickname(savedUser.getNickname())
+                .birth(savedUser.getBirth())
+                .email(savedUser.getEmail())
+                .phoneNumber(savedUser.getPhoneNumber())
+                .role(savedUser.getRole().name())
+                .isArtistApproved(savedUser.isArtistApproved())
+                .artistBio(savedUser.getArtistBio())
+                .profileImage(savedUser.getProfileImage())
                 .build();
     }
 }
