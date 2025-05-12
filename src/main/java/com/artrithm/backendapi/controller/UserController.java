@@ -13,24 +13,30 @@ public class UserController {
 
     private final UserService userService;
 
-    // ✅ 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody UserDto dto) {
-        Long userId = userService.registerUser(dto);
+    public ResponseEntity<String> signup(@RequestBody UserDto userDto) {
+        Long userId = userService.registerUser(userDto);
         return ResponseEntity.ok("회원가입 성공! userId = " + userId);
     }
 
-    // ✅ 로그인
     @PostMapping("/login")
-    public ResponseEntity<UserDto> login(@RequestBody UserDto dto) {
-        UserDto userInfo = userService.login(dto);
+    public ResponseEntity<UserDto> login(@RequestBody UserDto userDto) {
+        UserDto userInfo = userService.login(userDto);
         return ResponseEntity.ok(userInfo);
     }
 
-    // ✅ 사용자 정보 조회 (userId 파라미터 방식)
-    @GetMapping("/info")
-    public ResponseEntity<UserDto> getUserInfo(@RequestParam Long userId) {
+    @GetMapping("/{userId}") // ✅ RESTful 스타일
+    public ResponseEntity<UserDto> getUserInfo(@PathVariable Long userId) {
         UserDto user = userService.getUserInfo(userId);
         return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<String> updateUser(
+            @PathVariable Long userId,
+            @ModelAttribute UserDto userDto) { // ✅ multipart/form-data를 받을 경우 @RequestBody → @ModelAttribute
+
+        userService.updateUserInfo(userId, userDto);
+        return ResponseEntity.ok("회원 정보가 성공적으로 수정되었습니다.");
     }
 }
