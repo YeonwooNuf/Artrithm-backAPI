@@ -1,81 +1,36 @@
 package com.artrithm.backendapi.controller;
 
-import com.artrithm.backendapi.entity.LoginDto;
-import com.artrithm.backendapi.entity.User;
+import com.artrithm.backendapi.dto.UserDto;
 import com.artrithm.backendapi.service.UserService;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @PostMapping("/create")
-    public User createUser(@RequestBody User user) {
-        User result = null;
-        result = userService.createUser(user);
-        return result;
+    // ✅ 회원가입
+    @PostMapping("/signup")
+    public ResponseEntity<String> signup(@RequestBody UserDto dto) {
+        Long userId = userService.registerUser(dto);
+        return ResponseEntity.ok("회원가입 성공! userId = " + userId);
     }
 
-    @GetMapping
-    public List<User> getAllUsers(HttpSession session) {
-        List<User> result = null;
-        result = userService.getAllUsers();
-        return result;
-    }
-
-    @GetMapping("/{id}")
-    public User findUserById(@PathVariable long id) {
-        User result = null;
-        result = userService.getUserById(id);
-        return result;
-    }
-
-    @GetMapping("/delete/{id}")
-    public User deleteUserById(@PathVariable long id) {
-        User result = null;
-        result = userService.deleteUserById(id);
-        return result;
-    }
-    @PostMapping("/update/{id}")
-    public User updateUser(@RequestBody User userDetails, @PathVariable long id) {
-        User result = null;
-        result = userService.updateUser(id,userDetails);
-        return result;
-    }
-
+    // ✅ 로그인
     @PostMapping("/login")
-    public String login(@RequestBody LoginDto loginDto, HttpSession session) {
-        User user = userService.authenticate(loginDto.getUsername(), loginDto.getPassword());
-        if (user != null) {
-            session.setAttribute("userId", user.getId());
-            return user.getUsername()+" 로그인 성공";
-        } else {
-            return "로그인 실패";
-        }
+    public ResponseEntity<UserDto> login(@RequestBody UserDto dto) {
+        UserDto userInfo = userService.login(dto);
+        return ResponseEntity.ok(userInfo);
     }
 
-    @PostMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "로그아웃";
+    // ✅ 사용자 정보 조회 (userId 파라미터 방식)
+    @GetMapping("/info")
+    public ResponseEntity<UserDto> getUserInfo(@RequestParam Long userId) {
+        UserDto user = userService.getUserInfo(userId);
+        return ResponseEntity.ok(user);
     }
-
-    @GetMapping("/session-check")
-    public String checkLogin(HttpSession session) {
-        Object userId = session.getAttribute("userId");
-        if (userId != null) {
-            return "로그인 상태 userId = " + userId;
-        } else {
-            return "로그인 안됨 (세션 없음)";
-        }
-    }
-
 }
