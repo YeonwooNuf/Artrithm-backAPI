@@ -11,6 +11,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/api/**")
                 .allowedOrigins("http://localhost:5173") // React dev 서버 주소
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
-                .allowCredentials(true); // ✅ 세션 쿠키 허용
+                .allowCredentials(true); // 세션 쿠키 허용
     }
 }
