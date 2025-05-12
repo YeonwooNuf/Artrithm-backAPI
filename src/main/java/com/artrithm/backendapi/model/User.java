@@ -3,6 +3,8 @@ package com.artrithm.backendapi.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -24,6 +26,9 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String nickname;
+
+    @Column(nullable = true)
+    private LocalDate birth;
 
     @Column(nullable = false, unique = true)
     private String email;
