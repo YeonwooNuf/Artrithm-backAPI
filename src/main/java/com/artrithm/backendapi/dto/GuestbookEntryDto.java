@@ -10,6 +10,8 @@ import lombok.*;
 public class GuestbookEntryDto {
     private Long id;
     private Long userId;
-    private String nickname;  // ✅ 이거 포함
+    private String nickname;
     private String message;
+    private String createdAt;       // ✅ 선택
+    private String profileImage;    // ✅ 선택
 }
