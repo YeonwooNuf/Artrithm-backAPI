@@ -1,21 +1,30 @@
 package com.artrithm.backendapi.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Table(name = "artworks")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Artwork {
+
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exhibition_id", nullable = false)
     private Exhibition exhibition;
 
     private String title;
-    private String description;
-    private String src;  // 이미지 경로
-}
 
+    @Column(length = 1000)
+    private String description;
+
+    @Column(nullable = false)
+    private String imageUrl;  // ✅ 명확한 네이밍
+}

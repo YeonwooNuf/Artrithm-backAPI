@@ -12,5 +12,5 @@ public class ArtworkDto {
     private Long id;
     private String title;
     private String description;
-    private String src;
+    private String imageUrl;  // 변경: src → imageUrl
 }
