@@ -1,6 +1,7 @@
 package com.artrithm.backendapi.dto;
 
 import lombok.*;
+
 import java.util.List;
 
 @Getter
@@ -11,13 +12,20 @@ import java.util.List;
 public class ExhibitionDto {
 
     private Long id;
-    private Long authorId;          // 작성자 userId
+
+    // 작성자 정보
+    private Long authorId;
+    private String authorNickname; // ✅ 선택: 프론트에서 표시용
+
     private String title;
     private String description;
     private String theme;
-    private String thumbnail;
+
+    private String thumbnailUrl;
+
     private List<String> keywords;
 
     private List<ArtworkDto> artworks;
+
     private List<GuestbookEntryDto> guestbook;
 }
