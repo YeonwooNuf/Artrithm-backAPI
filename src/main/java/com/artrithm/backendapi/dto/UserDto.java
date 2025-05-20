@@ -2,8 +2,11 @@ package com.artrithm.backendapi.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
-@JsonInclude(JsonInclude.Include.NON_NULL) // null 필드는 JSON에 포함하지 않음
+import java.time.LocalDate;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -11,10 +14,18 @@ import lombok.*;
 @Builder
 public class UserDto {
 
-    private Long id;              // 응답용
-    private String loginId;       // 입력/출력 모두 사용 가능
-    private String password;      // 입력용
+    private Long id;
+    private String loginId;
+    private String password;
     private String nickname;
+    private LocalDate birth;
     private String email;
     private String phoneNumber;
+
+    private String role;               // USER / ARTIST / ADMIN
+    private Boolean isArtistApproved; // 작가 승인 여부
+    private String artistBio;         // 작가 소개글
+    private String profileImage;      // S3 경로 또는 URL
+
+    private MultipartFile profileImageFile; // ✅ 실제 이미지 파일
 }

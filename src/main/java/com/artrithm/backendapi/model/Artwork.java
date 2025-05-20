@@ -1,0 +1,30 @@
+package com.artrithm.backendapi.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "artworks")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Artwork {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exhibition_id", nullable = false)
+    private Exhibition exhibition;
+
+    private String title;
+
+    @Column(length = 1000)
+    private String description;
+
+    @Column(nullable = false)
+    private String imageUrl;  // ✅ 명확한 네이밍
+}
