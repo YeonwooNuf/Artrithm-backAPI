@@ -16,8 +16,12 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry
-                .addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/"); // 프로젝트 루트 기준 폴더
+        String uploadDir = System.getenv("UPLOAD_DIR");
+        if (uploadDir == null || uploadDir.isBlank()) {
+            uploadDir = System.getProperty("user.dir") + "/uploads"; // 예: backend-api/uploads
+        }
+
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:" + uploadDir + "/");
     }
 }
