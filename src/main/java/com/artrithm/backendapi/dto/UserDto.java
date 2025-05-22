@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
@@ -28,4 +29,6 @@ public class UserDto {
     private String profileImage;      // S3 경로 또는 URL
 
     private MultipartFile profileImageFile; // ✅ 실제 이미지 파일
+
+    private List<ArtworkDto> artworks; // 개인 작가의 작품 목록
 }
