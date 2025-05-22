@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -51,6 +52,10 @@ public class User {
 
     // ✅ 작가 설명 (승인 후 등록 가능)
     private String artistBio;
+
+    // 개인 작가 작품
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Artwork> artworks;
 
     // ✅ 프로필 이미지 경로 (가입 후 등록 가능)
     private String profileImage;
