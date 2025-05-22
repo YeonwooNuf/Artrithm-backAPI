@@ -37,6 +37,10 @@ public class Exhibition {
     @Column(name = "keyword")
     private List<String> keywords;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "artist_id") // Nullable: 명화 전시에만 설정됨
+    private Artist artist;
+
     @OneToMany(mappedBy = "exhibition", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Artwork> artworks;
 
