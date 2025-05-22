@@ -28,4 +28,7 @@ public class ExhibitionDto {
     private List<ArtworkDto> artworks;
 
     private List<GuestbookEntryDto> guestbook;
+
+    // ✅ 관리자 전용: 실존 작가 정보 연결
+    private ArtistDto artistInfo;
 }
