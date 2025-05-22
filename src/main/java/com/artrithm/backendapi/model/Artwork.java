@@ -20,6 +20,14 @@ public class Artwork {
     @JoinColumn(name = "exhibition_id", nullable = false)
     private Exhibition exhibition;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "artist_id")
+    private Artist artist;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     private String title;
 
     @Column(length = 1000)
