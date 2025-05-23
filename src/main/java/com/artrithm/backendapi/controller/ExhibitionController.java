@@ -12,28 +12,38 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/exhibitions")
+@RequestMapping("/api/exhibitions") // ✅ 공통 prefix
 @RequiredArgsConstructor
 public class ExhibitionController {
 
     private final ExhibitionService exhibitionService;
 
-    // 전시 업로드
+    // ✅ 전시 업로드
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadExhibition(MultipartHttpServletRequest request) throws IOException {
         exhibitionService.saveExhibition(request);
         return ResponseEntity.ok("전시가 성공적으로 업로드되었습니다.");
     }
 
-    // 전체 전시 목록 조회
+    // ✅ 전체 전시 목록 조회
     @GetMapping
     public ResponseEntity<List<ExhibitionDto>> getAllExhibitions() {
         return ResponseEntity.ok(exhibitionService.getAllExhibitions());
     }
 
-    // 단일 전시 상세 조회
+    // ✅ 단일 전시 상세 조회
     @GetMapping("/{id}")
     public ResponseEntity<ExhibitionDto> getExhibition(@PathVariable Long id) {
         return ResponseEntity.ok(exhibitionService.getExhibitionById(id));
+    }
+
+    // ✅ 전시 수정 (multipart/form-data 기반 PUT 처리)
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> updateExhibition(
+            @PathVariable Long id,
+            MultipartHttpServletRequest request) throws IOException {
+
+        exhibitionService.updateExhibition(id, request);
+        return ResponseEntity.ok().build();
     }
 }

@@ -100,7 +100,8 @@ public class UserService {
         user.setBirth(dto.getBirth());
         user.setEmail(dto.getEmail());
 
-        if (user.isArtistApproved() && dto.getArtistBio() != null) {
+        if ((user.isArtistApproved() || user.getRole().equals(User.Role.ADMIN))
+                && dto.getArtistBio() != null) {
             user.setArtistBio(dto.getArtistBio());
         }
 
