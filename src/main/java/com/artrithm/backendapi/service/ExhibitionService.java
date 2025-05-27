@@ -160,6 +160,8 @@ public class ExhibitionService {
                     .description(workDesc)
                     .imageUrl(workImgUrl)
                     .exhibition(exhibition)
+                    .user(user)  // ✅ 업로더 지정!
+                    .artist(exhibition.getArtist())  // ✅ 명화 전시일 경우, artist도 함께 지정
                     .build();
 
             artworkRepository.save(artwork);
