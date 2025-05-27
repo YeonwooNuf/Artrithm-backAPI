@@ -3,9 +3,13 @@ package com.artrithm.backendapi.controller;
 import com.artrithm.backendapi.dto.ArtistDto;
 import com.artrithm.backendapi.service.ArtistService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -28,9 +32,31 @@ public class ArtistController {
     }
 
     // ✅ 작가 등록 (관리자만)
-    @PostMapping
-    public ResponseEntity<ArtistDto> createArtist(@RequestBody ArtistDto dto) {
-        // ⚠️ 추후 관리자 권한 검증 로직 추가 필요
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ArtistDto> createArtist(
+            @RequestParam("name") String name,
+            @RequestParam("bio") String bio,
+            @RequestParam("nationality") String nationality,
+            @RequestParam(value = "birthDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate birthDate,
+            @RequestParam(value = "deathDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate deathDate,
+            @RequestParam(value = "profileImageFile", required = false) MultipartFile profileImageFile
+    ) {
+        String profileImageUrl = null;
+        if (profileImageFile != null && !profileImageFile.isEmpty()) {
+            profileImageUrl = artistService.saveProfileImage(profileImageFile); // 또는 fileUploadService 사용
+        }
+
+        ArtistDto dto = ArtistDto.builder()
+                .name(name)
+                .bio(bio)
+                .nationality(nationality)
+                .birthDate(birthDate)
+                .deathDate(deathDate)
+                .profileImage(profileImageUrl)
+                .build();
+
         return ResponseEntity.ok(artistService.createArtist(dto));
     }
 }
