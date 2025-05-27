@@ -5,7 +5,9 @@ import com.artrithm.backendapi.model.Artist;
 import com.artrithm.backendapi.repository.ArtistRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 public class ArtistService {
 
     private final ArtistRepository artistRepository;
+    private final FileUploadService fileUploadService;
 
     // ✅ 전체 작가 목록 조회
     public List<ArtistDto> getAllArtists() {
@@ -41,6 +44,15 @@ public class ArtistService {
                 .build();
 
         return toDto(artistRepository.save(artist));
+    }
+
+    // ✅ 프로필 이미지 저장
+    public String saveProfileImage(MultipartFile file) {
+        try {
+            return fileUploadService.saveFile(file, "artist-profiles");
+        } catch (IOException e) {
+            throw new RuntimeException("작가 프로필 이미지 저장 실패", e);
+        }
     }
 
     private ArtistDto toDto(Artist artist) {
