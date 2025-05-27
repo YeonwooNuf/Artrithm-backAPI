@@ -34,5 +34,8 @@ public class Artwork {
     private String description;
 
     @Column(nullable = false)
-    private String imageUrl;  // ✅ 명확한 네이밍
+    private String imageUrl;
+
+    @Column(length = 1000)
+    private String explanationFileUrl;  // 챗봇용 설명 파일 PDF
 }
