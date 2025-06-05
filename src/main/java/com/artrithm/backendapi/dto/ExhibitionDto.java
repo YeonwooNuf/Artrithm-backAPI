@@ -1,5 +1,6 @@
 package com.artrithm.backendapi.dto;
 
+import com.artrithm.backendapi.model.Exhibition;
 import lombok.*;
 
 import java.util.List;
@@ -31,4 +32,13 @@ public class ExhibitionDto {
 
     // ✅ 관리자 전용: 실존 작가 정보 연결
     private ArtistDto artistInfo;
+
+    public static ExhibitionDto fromEntity(Exhibition exhibition) {
+        return ExhibitionDto.builder()
+                .id(exhibition.getId())
+                .title(exhibition.getTitle())
+                .theme(exhibition.getTheme())
+                .authorId(exhibition.getAuthor().getId()) // 필요한 경우
+                .build();
+    }
 }
