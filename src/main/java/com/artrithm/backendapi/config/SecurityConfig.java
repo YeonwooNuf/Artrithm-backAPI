@@ -14,10 +14,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors() // ✅ WebMvcConfigurer의 CORS 설정을 적용하기 위한 필수 설정
+                .and()
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // 모든 요청 허용
+                        .anyRequest().permitAll()
                 )
-                .csrf(csrf -> csrf.disable()); // ✅ 최신 문법
+                .csrf(csrf -> csrf.disable()); // CSRF 비활성화
 
         return http.build();
     }
@@ -26,7 +28,7 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
+
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
