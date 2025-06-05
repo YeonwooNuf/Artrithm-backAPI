@@ -179,6 +179,13 @@ public class ExhibitionService {
         return toDto(exhibition);
     }
 
+    public List<ExhibitionDto> getExhibitionsByAuthor(Long authorId) {
+        List<Exhibition> exhibitions = exhibitionRepository.findByAuthorId(authorId);
+        return exhibitions.stream()
+                .map(ExhibitionDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
     private ExhibitionDto toDto(Exhibition exhibition) {
         return ExhibitionDto.builder()
                 .id(exhibition.getId())
