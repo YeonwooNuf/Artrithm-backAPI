@@ -45,5 +45,5 @@ public class Exhibition {
     private List<Artwork> artworks;
 
     @OneToMany(mappedBy = "exhibition", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<GuestbookEntry> guestbook;
+    private List<Guestbook> guestbook;
 }
