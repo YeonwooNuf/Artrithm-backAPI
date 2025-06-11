@@ -31,6 +31,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    // user 정보 수정
     @PutMapping("/{userId}")
     public ResponseEntity<String> updateUser(
             @PathVariable Long userId,
