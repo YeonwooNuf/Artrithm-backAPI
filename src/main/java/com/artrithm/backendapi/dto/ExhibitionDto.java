@@ -27,7 +27,7 @@ public class ExhibitionDto {
 
     private List<String> keywords;
     private List<ArtworkDto> artworks;
-    private List<GuestbookEntryDto> guestbook;
+    private List<GuestbookDto> guestbook;
 
     // ✅ 명화 전시일 경우에만 존재
     private ArtistDto artistInfo;
@@ -54,7 +54,7 @@ public class ExhibitionDto {
                 .guestbook(
                         exhibition.getGuestbook() != null
                                 ? exhibition.getGuestbook().stream()
-                                .map(GuestbookEntryDto::fromEntity)
+                                .map(GuestbookDto::fromEntity)
                                 .toList()
                                 : List.of()
                 )
