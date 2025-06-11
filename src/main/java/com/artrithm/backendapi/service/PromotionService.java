@@ -65,6 +65,7 @@ public class PromotionService {
 
         User user = req.getUser();
         user.setRole(User.Role.ARTIST); // enum으로 관리 중일 경우
+        user.setArtistApproved(true); // User 정보 업데이트
         req.setApproved(true);
 
         userRepository.save(user);
