@@ -26,7 +26,7 @@ public class GuestbookService {
     public List<GuestbookDto> getAll(Long exhibitionId) {
         return guestbookRepository.findByExhibitionIdOrderByCreatedAtDesc(exhibitionId)
                 .stream()
-                .map(GuestbookDto::from)
+                .map(GuestbookDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
