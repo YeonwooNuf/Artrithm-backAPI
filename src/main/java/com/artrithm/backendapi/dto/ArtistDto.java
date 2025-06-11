@@ -1,5 +1,6 @@
 package com.artrithm.backendapi.dto;
 
+import com.artrithm.backendapi.model.Artist;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -21,4 +22,23 @@ public class ArtistDto {
     private LocalDate deathDate;    // 사망일
 
     private List<ArtworkDto> artworks; // 작가가 등록한 작품들
+
+    public static ArtistDto fromEntity(Artist artist) {
+        return ArtistDto.builder()
+                .id(artist.getId())
+                .name(artist.getName())
+                .bio(artist.getBio())
+                .profileImage(artist.getProfileImage())
+                .nationality(artist.getNationality())
+                .birthDate(artist.getBirthDate())
+                .deathDate(artist.getDeathDate())
+                .artworks(
+                        artist.getArtworks() != null
+                                ? artist.getArtworks().stream()
+                                .map(ArtworkDto::fromEntity)
+                                .toList()
+                                : List.of()
+                )
+                .build();
+    }
 }
