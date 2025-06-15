@@ -2,64 +2,80 @@ package com.artrithm.backendapi.websocket;
 
 import com.artrithm.backendapi.model.ChatMessage;
 import com.artrithm.backendapi.repository.ChatMessageRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     private final ChatMessageRepository chatMessageRepository;
-    private final Map<String, WebSocketSession> sessions = new HashMap<>();
+    private final Map<String, List<WebSocketSession>> roomSessions = new HashMap<>();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
         String roomId = getRoomIdFromQuery(session);
-        sessions.put(session.getId(), session);
-        System.out.println("✅ 채팅 연결됨: " + session.getId() + " (roomId: " + roomId + ")");
-    }
-
-    @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        String payload = message.getPayload(); // JSON 문자열
-        // (예: {"roomId":"abc123", "senderId":1, "senderRole":"viewer", "message":"안녕하세요"})
-
-        // 실제로는 Jackson 사용해 JSON 파싱 (간단화 버전)
-        System.out.println("💬 메시지 수신: " + payload);
-
-        // 메시지를 MongoDB에 저장 (예시)
-        ChatMessage chatMessage = ChatMessage.builder()
-                .roomId("roomId") // 실제 파싱 필요
-                .senderId(1L)
-                .senderRole("viewer")
-                .message(payload)
-                .sentAt(LocalDateTime.now())
-                .build();
-        chatMessageRepository.save(chatMessage);
-
-        // 전체 사용자에게 메시지 브로드캐스트 (단일 roomId라면 필터 가능)
-        for (WebSocketSession s : sessions.values()) {
-            if (s.isOpen()) {
-                s.sendMessage(message);
+        if (roomId != null) {
+            roomSessions.computeIfAbsent(roomId, k -> new ArrayList<>()).add(session);
+            System.out.println("✅ 채팅 연결됨: " + session.getId() + " (roomId: " + roomId + ")");
+        } else {
+            System.out.println("❌ roomId 없음, 연결 거부됨");
+            try {
+                session.close(CloseStatus.BAD_DATA);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
 
-    private String getRoomIdFromQuery(WebSocketSession session) {
-        // ?roomId=xxx 같은 파라미터 파싱
-        String query = session.getUri().getQuery();
-        if (query != null && query.startsWith("roomId=")) {
-            return query.substring(7);
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        // JSON 파싱
+        Map<String, Object> data = objectMapper.readValue(message.getPayload(), Map.class);
+        String roomId = (String) data.get("roomId");
+        Long senderId = Long.parseLong(data.get("senderId").toString());
+        String senderRole = (String) data.get("senderRole");
+        String content = (String) data.get("message");
+
+        // 메시지 생성 및 저장
+        ChatMessage chatMessage = ChatMessage.builder()
+                .roomId(roomId)
+                .senderId(senderId)
+                .senderRole(senderRole)
+                .message(content)
+                .sentAt(LocalDateTime.now())
+                .build();
+        chatMessageRepository.save(chatMessage);
+
+        // 해당 roomId 세션에만 전송
+        List<WebSocketSession> room = roomSessions.get(roomId);
+        if (room != null) {
+            String broadcast = objectMapper.writeValueAsString(chatMessage);
+            for (WebSocketSession s : room) {
+                if (s.isOpen()) {
+                    s.sendMessage(new TextMessage(broadcast));
+                }
+            }
         }
-        return null;
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        sessions.remove(session.getId());
+        // 모든 room에서 세션 제거
+        roomSessions.values().forEach(sessions -> sessions.remove(session));
+        System.out.println("❎ 채팅 종료됨: " + session.getId());
+    }
+
+    private String getRoomIdFromQuery(WebSocketSession session) {
+        String query = session.getUri() != null ? session.getUri().getQuery() : null;
+        if (query != null && query.startsWith("roomId=")) {
+            return query.substring(7);
+        }
+        return null;
     }
 }
