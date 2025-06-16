@@ -11,4 +11,7 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 
     @Query("SELECT a FROM Artwork a WHERE a.user IS NULL AND a.artist IS NOT NULL")
     List<Artwork> findMasterpieces();  // 명화만 조회
+    List<Artwork> findByUserId(Long userId);
+    List<Artwork> findByUserIdAndSaleStatusIsNull(Long userId);
+
 }
