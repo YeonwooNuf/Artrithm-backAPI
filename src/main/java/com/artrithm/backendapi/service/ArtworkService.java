@@ -75,4 +75,18 @@ public class ArtworkService {
                 .imageUrl(a.getImageUrl())
                 .build();
     }
+
+    public List<ArtworkDto> getMyArtworks(Long userId) {
+        return artworkRepository.findByUserIdAndSaleStatusIsNull(userId).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    private ArtworkDto convertToDto(Artwork artwork){
+        return ArtworkDto.builder()
+                .id(artwork.getId())
+                .title(artwork.getTitle())
+                .imageUrl(artwork.getImageUrl())
+                .build();
+    }
 }
