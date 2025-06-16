@@ -12,6 +12,7 @@ import lombok.*;
 @Builder
 public class Artwork {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,4 +39,9 @@ public class Artwork {
 
     @Column(length = 1000)
     private String explanationFileUrl;  // 챗봇용 설명 파일 PDF
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sale_status")
+    private SaleStatus saleStatus;
+
 }
