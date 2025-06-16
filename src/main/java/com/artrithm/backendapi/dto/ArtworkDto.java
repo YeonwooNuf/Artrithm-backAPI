@@ -3,6 +3,8 @@ package com.artrithm.backendapi.dto;
 import com.artrithm.backendapi.model.Artwork;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
