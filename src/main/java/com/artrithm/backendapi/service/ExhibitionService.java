@@ -1,5 +1,6 @@
 package com.artrithm.backendapi.service;
 
+import com.artrithm.backendapi.dto.ArtistDto;
 import com.artrithm.backendapi.dto.ArtworkDto;
 import com.artrithm.backendapi.dto.ExhibitionDto;
 import com.artrithm.backendapi.model.Artist;
@@ -179,26 +180,23 @@ public class ExhibitionService {
         return toDto(exhibition);
     }
 
-    private ExhibitionDto toDto(Exhibition exhibition) {
-        return ExhibitionDto.builder()
-                .id(exhibition.getId())
-                .authorId(exhibition.getAuthor().getId())
-                .authorNickname(exhibition.getAuthor().getNickname())
-                .title(exhibition.getTitle())
-                .description(exhibition.getDescription())
-                .theme(exhibition.getTheme())
-                .thumbnailUrl(exhibition.getThumbnailUrl())
-                .keywords(exhibition.getKeywords())
-                .artworks(exhibition.getArtworks().stream().map(this::toArtworkDto).collect(Collectors.toList()))
-                .build();
+    public List<ExhibitionDto> getExhibitionsByAuthor(Long authorId) {
+        List<Exhibition> exhibitions = exhibitionRepository.findByAuthorId(authorId);
+        return exhibitions.stream()
+                .map(ExhibitionDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
-    private ArtworkDto toArtworkDto(Artwork a) {
+    private ExhibitionDto toDto(Exhibition exhibition) {
+        return ExhibitionDto.fromEntity(exhibition); // ✅ 이렇게 변경!
+    }
+
+    private ArtworkDto toArtworkDto(Artwork artwork) {
         return ArtworkDto.builder()
-                .id(a.getId())
-                .title(a.getTitle())
-                .description(a.getDescription())
-                .imageUrl(a.getImageUrl())
+                .id(artwork.getId())
+                .title(artwork.getTitle())
+                .description(artwork.getDescription())
+                .imageUrl(artwork.getImageUrl())
                 .build();
     }
 }
