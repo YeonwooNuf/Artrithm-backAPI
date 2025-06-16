@@ -1,13 +1,8 @@
 package com.artrithm.backendapi.service;
 
-import com.artrithm.backendapi.dto.ArtistDto;
-import com.artrithm.backendapi.dto.ArtworkDto;
-import com.artrithm.backendapi.dto.AuctionBidDto;
-import com.artrithm.backendapi.dto.AuctionDto;
+import com.artrithm.backendapi.dto.*;
 import com.artrithm.backendapi.model.*;
-import com.artrithm.backendapi.repository.AuctionBidRepository;
-import com.artrithm.backendapi.repository.AuctionRepository;
-import com.artrithm.backendapi.repository.UserRepository;
+import com.artrithm.backendapi.repository.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Generated;
@@ -15,11 +10,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -129,16 +123,107 @@ public class AuctionService {
     }
 
     //낙찰 완료시
+    @Transactional
     public void finalizeAuction(Long auctionId) {
-        AuctionBid bid = auctionBidRepository.findById(auctionId).orElseThrow();
-        Auction auction = auctionRepository.findById(bid.getAuctionId()).orElseThrow();
+        Auction auction = auctionRepository.findById(auctionId)
+                .orElseThrow(() -> new RuntimeException("해당 경매를 찾을 수 없습니다."));
 
-        auction.setWinnerUserId(bid.getTop1UserId());
-        auction.setFinalPrice(bid.getTop1Price());
+        Optional<AuctionBid> bidOpt = auctionBidRepository.findByAuctionId(auctionId);
+
+        if (bidOpt.isPresent() && bidOpt.get().getTop1UserId() != null) {
+            AuctionBid bid = bidOpt.get();
+
+            auction.setWinnerUserId(bid.getTop1UserId());
+            auction.setFinalPrice(bid.getTop1Price());
+
+            User winner = userRepository.findById(Long.valueOf(bid.getTop1UserId())).orElse(null);
+            if (winner != null) {
+                auction.setWinnerNickname(winner.getNickname());
+            }
+
+            // ✅ 낙찰된 경우 작품 상태를 PENDING으로 설정
+            Artwork artwork = auction.getArtwork();
+            artwork.setSaleStatus(SaleStatus.UNSOLD);
+            artworkRepository.save(artwork);
+
+        } else {
+            System.out.println("❗ 입찰자가 없습니다. 유찰 처리");
+        }
+
+        // ✅ 입찰 유무와 관계없이 상태는 ENDED로 변경
         auction.setStatus(AuctionStatus.ENDED);
+        auctionRepository.save(auction);
+        auctionRepository.flush();
+    }
+
+
+
+
+    //경매 신청
+    private final ArtworkRepository artworkRepository;
+    private final AuctionRequestRepository auctionRequestRepository;
+
+    public void requestAuction(AuctionRequestDto dto) {
+        Artwork artwork = artworkRepository.findById(dto.getArtworkId())
+                .orElseThrow(() -> new IllegalArgumentException("작품이 존재하지 않습니다."));
+
+        // 이미 등록된 작품은 다시 신청 불가
+        if (artwork.getSaleStatus() == SaleStatus.UNSOLD ||
+                artwork.getSaleStatus() == SaleStatus.PENDING) {
+            throw new IllegalStateException("이미 경매가 신청되었거나 대기 중입니다.");
+        }
+
+        //경매 신청 저장
+        AuctionRequest request = AuctionRequest.builder()
+                .artwork(artwork)
+                .startPrice(dto.getStartPrice())
+                .approved(false)
+                .build();
+
+        auctionRequestRepository.save(request);
+
+        //신청과 동시에 상태 unsold로 변경
+        artwork.setSaleStatus(SaleStatus.UNSOLD);
+        artworkRepository.save(artwork);
+    }
+
+    // 경매 등록
+    public void registerAuction(AuctionRegisterDto dto) {
+        boolean isOngoingExists = auctionRepository.existsByStatus(AuctionStatus.ONGOING);
+        if (isOngoingExists) {
+            throw new IllegalStateException("이미 진행 중인 경매가 있습니다.");
+        }
+
+        AuctionRequest request = auctionRequestRepository.findById(dto.getAuctionRequestId())
+                .orElseThrow(() -> new IllegalArgumentException("신청 정보를 찾을 수 없습니다."));
+
+        // 승인 처리
+        request.setApproved(true);
+        auctionRequestRepository.save(request);
+
+        // 현재 시간 기준으로 경매 시작
+        LocalDateTime now = LocalDateTime.now();
+
+        Auction auction = Auction.builder()
+                .artwork(request.getArtwork())
+                .startPrice(request.getStartPrice())
+                .startTime(now)
+                .endTime(dto.getEndTime())
+                .status(AuctionStatus.ONGOING)
+                .build();
 
         auctionRepository.save(auction);
     }
 
+
+
+
+    public List<AuctionRequest> getUnapprovedRequests() {
+        return auctionRequestRepository.findByApproved(false);
+    }
+
+    public List<Auction> getOngoingAuctions(){
+        return auctionRepository.findByStatus(AuctionStatus.ONGOING);
+    }
 
 }

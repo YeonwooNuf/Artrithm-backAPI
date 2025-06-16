@@ -1,6 +1,5 @@
 package com.artrithm.backendapi.model;
 
-import com.artrithm.backendapi.dto.ArtworkDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,9 +22,9 @@ public class Auction {
     @JoinColumn(name = "artwork_id")
     private Artwork artwork;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+
     @JoinColumn(name = "nickname")
-    private User winnerNickname;
+    private String winnerNickname;
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;
