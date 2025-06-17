@@ -1,7 +1,9 @@
 package com.artrithm.backendapi.websocket;
 
 import com.artrithm.backendapi.model.ChatMessage;
+import com.artrithm.backendapi.model.ChatRoom;
 import com.artrithm.backendapi.repository.ChatMessageRepository;
+import com.artrithm.backendapi.repository.ChatRoomRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -16,6 +18,7 @@ import java.util.*;
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final Map<String, List<WebSocketSession>> roomSessions = new HashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -53,6 +56,16 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             String content = (String) data.get("message");
 
             System.out.println("📦 파싱된 데이터 - roomId: " + roomId + ", senderId: " + senderId + ", senderRole: " + senderRole + ", message: " + content);
+
+            // ✅ 수신자 조회 및 로그
+            ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                    .orElseThrow(() -> new RuntimeException("❌ 채팅방 정보 없음: " + roomId));
+
+            Long receiverId = chatRoom.getArtistId().equals(senderId)
+                    ? chatRoom.getViewerId()
+                    : chatRoom.getArtistId();
+
+            System.out.println("📩 메시지 수신자 ID: " + receiverId);
 
             // 메시지 생성 및 저장
             ChatMessage chatMessage = ChatMessage.builder()
