@@ -18,7 +18,7 @@ public class ChatRoomController {
     // 1. 관람자 → 채팅방 생성 or 재사용
     @PostMapping("/create")
     public ChatRoom createRoom(@RequestParam Long exhibitionId,
-                               @RequestParam Long artistId,
+                               @RequestParam(required = false) Long artistId,
                                @RequestParam Long viewerId) {
         return chatRoomService.createOrGetRoom(exhibitionId, artistId, viewerId);
     }
