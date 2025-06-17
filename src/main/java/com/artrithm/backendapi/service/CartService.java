@@ -79,4 +79,8 @@ public class CartService {
     public void removeAuctionFromOthers(Long artworkId, Long winnerUserId) {
         cartItemRepository.deleteAllByArtworkIdAndUserIdNot(artworkId, winnerUserId);
     }
+
+    public void deleteCartItem(Long cartItemId){
+        cartItemRepository.deleteById(cartItemId);
+    }
 }
