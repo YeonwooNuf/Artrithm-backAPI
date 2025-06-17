@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-// UserLike.java
 @Entity
 @Getter
 @Setter

@@ -2,9 +2,11 @@ package com.artrithm.backendapi.repository;
 
 import com.artrithm.backendapi.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
     // ✅ 아이디 중복 확인

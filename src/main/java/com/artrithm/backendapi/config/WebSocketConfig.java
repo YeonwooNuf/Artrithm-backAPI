@@ -1,5 +1,6 @@
 package com.artrithm.backendapi.config;
 
+import com.artrithm.backendapi.repository.ChatRoomRepository;
 import com.artrithm.backendapi.service.AuctionService;
 import com.artrithm.backendapi.repository.ChatMessageRepository;
 import com.artrithm.backendapi.websocket.AuctionWebSocketHandler;
@@ -15,6 +16,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     private final AuctionService auctionService;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
@@ -23,7 +25,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
                 .setAllowedOrigins("*");
 
         // 채팅 WebSocket
-        registry.addHandler(new ChatWebSocketHandler(chatMessageRepository), "/ws/chat")
+        registry.addHandler(new ChatWebSocketHandler(chatMessageRepository, chatRoomRepository), "/ws/chat")
                 .setAllowedOrigins("*");
     }
 }
