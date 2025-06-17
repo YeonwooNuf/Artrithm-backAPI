@@ -4,9 +4,11 @@ import com.artrithm.backendapi.dto.ChatRoomDto;
 import com.artrithm.backendapi.model.ChatMessage;
 import com.artrithm.backendapi.model.ChatRoom;
 import com.artrithm.backendapi.model.User;
+import com.artrithm.backendapi.model.Exhibition;
 import com.artrithm.backendapi.repository.ChatMessageRepository;
 import com.artrithm.backendapi.repository.ChatRoomRepository;
 import com.artrithm.backendapi.repository.UserRepository;
+import com.artrithm.backendapi.repository.ExhibitionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,18 +24,31 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
+    private final ExhibitionRepository exhibitionRepository;
 
     public ChatRoom createOrGetRoom(Long exhibitionId, Long artistId, Long viewerId) {
-        return chatRoomRepository.findByExhibitionIdAndViewerId(exhibitionId, viewerId)
-                .orElseGet(() -> {
-                    ChatRoom newRoom = ChatRoom.builder()
-                            .exhibitionId(exhibitionId)
-                            .artistId(artistId)
-                            .viewerId(viewerId)
-                            .createdAt(LocalDateTime.now())
-                            .build();
-                    return chatRoomRepository.save(newRoom);
-                });
+        Optional<ChatRoom> existingRoom = chatRoomRepository.findByExhibitionIdAndViewerId(exhibitionId, viewerId);
+        if (existingRoom.isPresent()) return existingRoom.get();
+
+        // 👇 artistId가 null이면 해당 전시의 등록자 userId를 사용
+        if (artistId == null) {
+            artistId = getExhibitionOwnerId(exhibitionId);
+        }
+
+        ChatRoom newRoom = ChatRoom.builder()
+                .exhibitionId(exhibitionId)
+                .artistId(artistId)
+                .viewerId(viewerId)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        return chatRoomRepository.save(newRoom);
+    }
+
+    private Long getExhibitionOwnerId(Long exhibitionId) {
+        Exhibition exhibition = exhibitionRepository.findById(exhibitionId)
+                .orElseThrow(() -> new RuntimeException("전시 정보 없음"));
+        return exhibition.getAuthor().getId(); // 👈 전시 등록자
     }
 
     public List<ChatRoom> getRoomsByArtistId(Long artistId) {
@@ -70,7 +85,6 @@ public class ChatRoomService {
         }).collect(Collectors.toList());
     }
 
-    // 채팅 내용 조회 메소드
     public ChatRoomDto getRoomInfo(String roomId, Long userId) {
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("채팅방 없음"));
