@@ -35,4 +35,11 @@ public class CartController {
     public List<CartItemResponseDto> getUserCart(@PathVariable Long userId) {
         return cartService.getUserCart(userId).stream().map(CartItemResponseDto::fromEntity).collect(Collectors.toList());
     }
+
+    //장바구니에서 해당 아이템 삭제
+    @DeleteMapping("/delete/{cartItemId}")
+    public ResponseEntity<Void> deleteCartItem(@PathVariable Long cartItemId){
+        cartService.deleteCartItem(cartItemId);
+        return ResponseEntity.noContent().build();
+    }
 }
