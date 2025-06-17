@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class UserLike {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
