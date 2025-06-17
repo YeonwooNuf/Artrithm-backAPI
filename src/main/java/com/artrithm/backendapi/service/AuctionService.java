@@ -22,6 +22,7 @@ public class AuctionService {
     private final AuctionBidRepository auctionBidRepository;
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
+    private final CartService cartService;
 
     @Getter
     @AllArgsConstructor
@@ -146,6 +147,21 @@ public class AuctionService {
             artwork.setSaleStatus(SaleStatus.UNSOLD);
             artworkRepository.save(artwork);
 
+            cartService.addToCart(winner.getId(), artwork.getId(), CartItemType.AUCTION);
+//            // 🧩 장바구니 중복 방지 (이미 있으면 안 넣기)
+//
+//            boolean exists = cartItemRepository.existsByUserIdAndArtworkId(winner.getId(), artwork.getId());
+//            if (!exists) {
+//                CartItem cartItem = CartItem.builder()
+//                        .user(winner)
+//                        .artwork(artwork)
+//                        .type(CartItemType.AUCTION)
+//                        .price(auction.getFinalPrice().intValue())
+//                        .build();
+//
+//                cartItemRepository.save(cartItem);
+//            }
+
         } else {
             System.out.println("❗ 입찰자가 없습니다. 유찰 처리");
         }
@@ -162,6 +178,7 @@ public class AuctionService {
     //경매 신청
     private final ArtworkRepository artworkRepository;
     private final AuctionRequestRepository auctionRequestRepository;
+    private final CartItemRepository cartItemRepository;
 
     public void requestAuction(AuctionRequestDto dto) {
         Artwork artwork = artworkRepository.findById(dto.getArtworkId())
