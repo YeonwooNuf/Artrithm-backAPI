@@ -13,4 +13,8 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     Optional<Auction> findFirstByStatus(AuctionStatus status);
     Optional<Auction> findByArtworkId(Long artworkId);
 
+    Optional<Auction> findFirstByStatusOrderByStartTimeDesc(AuctionStatus auctionStatus);
+
+    Optional<Auction> findFirstByStatusOrderByEndTimeDesc(AuctionStatus status);
+
 }
