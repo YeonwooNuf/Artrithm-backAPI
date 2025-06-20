@@ -24,12 +24,19 @@ public class CartController {
     @PostMapping
     public ResponseEntity<?> addToCart(@RequestBody CartAddRequestDto request) {
         try {
-            cartService.addToCart(request.getUserId(), request.getArtworkId(), request.getType());
+            cartService.addToCart(
+                    request.getUserId(),
+                    request.getArtworkId(),
+                    request.getType(),
+                    request.getAuctionId(),
+                    request.getFixedPriceSaleId()
+            );
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 
     @GetMapping("/{userId}")
     public List<CartItemResponseDto> getUserCart(@PathVariable Long userId) {
