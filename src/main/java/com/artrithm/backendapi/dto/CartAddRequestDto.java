@@ -10,4 +10,6 @@ public class CartAddRequestDto {
     private Long userId;
     private Long artworkId;
     private CartItemType type;
+    private Long auctionId;
+    private Long fixedPriceSaleId;
 }

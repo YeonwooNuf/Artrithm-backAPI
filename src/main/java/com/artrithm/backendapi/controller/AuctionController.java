@@ -92,5 +92,20 @@ public class AuctionController {
         }
     }
 
+    // 최근 경매 낙찰 화면 보여줌
+    @GetMapping("/latest-ended")
+    public ResponseEntity<Object> getLatestEndedAuction() {
+        Optional<Auction> optional = auctionService.getLatestEndedAuction();
+
+        if (optional.isPresent()) {
+            return ResponseEntity.ok(optional.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("최근 종료된 경매가 없습니다.");
+        }
+    }
+
+
+
 
 }
