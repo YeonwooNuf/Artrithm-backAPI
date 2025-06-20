@@ -33,8 +33,11 @@ public class CartItem {
     @Column(nullable = false)
     private LocalDateTime addedAt;
 
-    @Column(nullable = false)
-    private Integer price; // 고정가든 경매든 이곳에 저장
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fixed_price_sale_id")
+    private FixedPriceSale fixedPriceSale;
 
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "auction_id")
+    private Auction auction;
 }
