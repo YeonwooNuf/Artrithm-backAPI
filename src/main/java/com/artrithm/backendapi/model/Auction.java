@@ -22,7 +22,6 @@ public class Auction {
     @JoinColumn(name = "artwork_id")
     private Artwork artwork;
 
-
     @JoinColumn(name = "nickname")
     private String winnerNickname;
 

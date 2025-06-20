@@ -36,7 +36,4 @@ public class FixedPriceSale {
 
     @Column(nullable = false)
     private BigDecimal price;
-
-
-
 }

@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Builder
 public class CartItem {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,6 +34,4 @@ public class CartItem {
 
     @Column(nullable = false)
     private Integer price; // 고정가든 경매든 이곳에 저장
-
-
 }
