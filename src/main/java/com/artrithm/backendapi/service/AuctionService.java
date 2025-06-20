@@ -134,6 +134,7 @@ public class AuctionService {
         if (bidOpt.isPresent() && bidOpt.get().getTop1UserId() != null) {
             AuctionBid bid = bidOpt.get();
 
+            // 낙찰자 정보 저장
             auction.setWinnerUserId(bid.getTop1UserId());
             auction.setFinalPrice(bid.getTop1Price());
 
@@ -142,35 +143,22 @@ public class AuctionService {
                 auction.setWinnerNickname(winner.getNickname());
             }
 
-            // ✅ 낙찰된 경우 작품 상태를 PENDING으로 설정
+            // 작품 상태 변경
             Artwork artwork = auction.getArtwork();
-            artwork.setSaleStatus(SaleStatus.UNSOLD);
+            artwork.setSaleStatus(SaleStatus.PENDING); // "결제 대기중"
             artworkRepository.save(artwork);
 
-            cartService.addToCart(winner.getId(), artwork.getId(), CartItemType.AUCTION);
-//            // 🧩 장바구니 중복 방지 (이미 있으면 안 넣기)
-//
-//            boolean exists = cartItemRepository.existsByUserIdAndArtworkId(winner.getId(), artwork.getId());
-//            if (!exists) {
-//                CartItem cartItem = CartItem.builder()
-//                        .user(winner)
-//                        .artwork(artwork)
-//                        .type(CartItemType.AUCTION)
-//                        .price(auction.getFinalPrice().intValue())
-//                        .build();
-//
-//                cartItemRepository.save(cartItem);
-//            }
-
+            // 장바구니에 낙찰작품 추가
+            cartService.addToCart(winner.getId(), artwork.getId(), CartItemType.AUCTION, auction.getAuctionId(), null);
         } else {
             System.out.println("❗ 입찰자가 없습니다. 유찰 처리");
         }
 
-        // ✅ 입찰 유무와 관계없이 상태는 ENDED로 변경
+        // 상태 종료로 변경
         auction.setStatus(AuctionStatus.ENDED);
-        auctionRepository.save(auction);
-        auctionRepository.flush();
+        auctionRepository.saveAndFlush(auction);
     }
+
 
 
 
@@ -232,6 +220,14 @@ public class AuctionService {
         auctionRepository.save(auction);
     }
 
+
+    public Optional<Auction> getOngoingAuction() {
+        return auctionRepository.findFirstByStatusOrderByStartTimeDesc(AuctionStatus.ONGOING);
+    }
+
+    public Optional<Auction> getLatestEndedAuction() {
+        return auctionRepository.findFirstByStatusOrderByEndTimeDesc(AuctionStatus.ENDED);
+    }
 
 
 
