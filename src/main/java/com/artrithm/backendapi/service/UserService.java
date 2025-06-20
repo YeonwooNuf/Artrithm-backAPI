@@ -56,6 +56,7 @@ public class UserService {
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
+        System.out.println("dfdfdfdf");
 
         return UserDto.builder()
                 .id(user.getId())

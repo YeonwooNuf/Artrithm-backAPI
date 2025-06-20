@@ -36,4 +36,8 @@ public class Auction {
 
     private String winnerUserId;
     private Integer finalPrice;
+
+    @Column(name = "payment_deadline")
+    private LocalDateTime paymentDeadline;
+
 }
