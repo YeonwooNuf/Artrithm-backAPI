@@ -20,5 +20,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     @Query("DELETE FROM CartItem c WHERE c.artwork.id = :artworkId AND c.user.id <> :winnerUserId")
     void deleteAllByArtworkIdAndUserIdNot(Long artworkId, Long winnerUserId);
 
-
+    List<CartItem> findByIdIn(List<Long> cartItemIds);
+    void deleteAllByIdIn(List<Long> cartItemIds);
 }
