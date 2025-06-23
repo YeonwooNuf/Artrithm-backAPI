@@ -35,5 +35,5 @@ public class FixedPriceSale {
     private User buyer;
 
     @Column(nullable = false)
-    private BigDecimal price;
+    private Integer price;
 }

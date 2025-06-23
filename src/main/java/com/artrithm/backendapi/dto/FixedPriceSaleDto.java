@@ -11,6 +11,6 @@ import java.math.BigDecimal;
 @Builder
 public class FixedPriceSaleDto {
     private Long artworkId;
-    private BigDecimal price;
+    private Integer price;
     private Long sellerUserId;
 }

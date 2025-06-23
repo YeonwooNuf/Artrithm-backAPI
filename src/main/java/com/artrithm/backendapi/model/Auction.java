@@ -39,5 +39,4 @@ public class Auction {
 
     @Column(name = "payment_deadline")
     private LocalDateTime paymentDeadline;
-
 }

@@ -14,7 +14,7 @@ public class FixedPriceArtworkDto {
     private String artworkTitle;
     private String artworkImageUrl;
     private String description;
-    private BigDecimal price;
+    private Integer price;
     private Long exhibitionId; // 추가
 
 }

@@ -35,7 +35,7 @@ public class FixedPriceSaleService {
      * @param sellerUserId : 판매자 ID
      */
     @Transactional
-    public void registerFixedPriceSale(Long artworkId, BigDecimal price, Long sellerUserId) {
+    public void registerFixedPriceSale(Long artworkId, Integer price, Long sellerUserId) {
         // 작품 확인
         Artwork artwork = artworkRepository.findById(artworkId)
                 .orElseThrow(() -> new IllegalArgumentException("작품이 존재하지 않습니다."));
