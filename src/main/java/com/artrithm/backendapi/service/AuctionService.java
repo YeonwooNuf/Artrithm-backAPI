@@ -137,6 +137,7 @@ public class AuctionService {
             // 낙찰자 정보 저장
             auction.setWinnerUserId(bid.getTop1UserId());
             auction.setFinalPrice(bid.getTop1Price());
+//            auction.setPaymentDeadline(LocalDateTime.now().plusHours(24));
 
             User winner = userRepository.findById(Long.valueOf(bid.getTop1UserId())).orElse(null);
             if (winner != null) {
