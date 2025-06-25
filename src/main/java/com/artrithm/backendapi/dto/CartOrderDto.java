@@ -16,6 +16,7 @@ public class CartOrderDto {
     private Long userId;
     private LocalDateTime orderedAt;
     private List<CartOrderItemDto> items;
+    private Integer totalAmount;
 
     public static CartOrderDto fromEntity(CartOrder order) {
         return CartOrderDto.builder()
@@ -25,6 +26,7 @@ public class CartOrderDto {
                 .items(order.getItems().stream()
                         .map(CartOrderItemDto::fromEntity)
                         .collect(Collectors.toList()))
+                .totalAmount(order.getTotalAmount())
                 .build();
     }
 }

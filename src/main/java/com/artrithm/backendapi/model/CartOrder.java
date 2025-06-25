@@ -28,5 +28,8 @@ public class CartOrder {
     @OneToMany(mappedBy = "cartOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartOrderItem> items;
 
+    @Column(nullable = false)
+    private Integer totalAmount;
+
     // 주문 상태 등을 나중에 추가 가능 (예: COMPLETED, CANCELED 등)
 }
