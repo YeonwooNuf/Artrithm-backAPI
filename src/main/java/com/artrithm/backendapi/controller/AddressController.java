@@ -27,14 +27,14 @@ public class AddressController {
     }
 
     @DeleteMapping("/{addressId}")
-    public ResponseEntity<Void> deleteAddress(@PathVariable Long addressId) {
-        addressService.deleteAddress(addressId);
+    public ResponseEntity<Void> deleteAddress(@PathVariable Long userId, @PathVariable Long addressId) {
+        addressService.deleteAddress(userId, addressId); // 수정 필요
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{addressId}/set-default")
-    public ResponseEntity<Void> setDefault(@PathVariable Long addressId) {
-        addressService.setDefaultAddress(addressId);
+    public ResponseEntity<Void> setDefault(@PathVariable Long userId, @PathVariable Long addressId) {
+        addressService.setDefaultAddress(userId, addressId); // 수정 필요
         return ResponseEntity.ok().build();
     }
 }

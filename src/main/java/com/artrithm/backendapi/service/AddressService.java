@@ -5,6 +5,7 @@ import com.artrithm.backendapi.model.Address;
 import com.artrithm.backendapi.model.User;
 import com.artrithm.backendapi.repository.AddressRepository;
 import com.artrithm.backendapi.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -40,14 +41,23 @@ public class AddressService {
         addressRepository.save(address);
     }
 
-    public void deleteAddress(Long id) {
-        addressRepository.deleteById(id);
+    public void deleteAddress(Long userId, Long addressId) {
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("주소를 찾을 수 없습니다."));
+        addressRepository.delete(address);
     }
 
-    public void setDefaultAddress(Long id) {
-        Address address = addressRepository.findById(id)
+    @Transactional
+    public void setDefaultAddress(Long userId, Long addressId) {
+        Address address = addressRepository.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("주소를 찾을 수 없습니다."));
-        addressRepository.resetDefaultAddress(address.getUser().getId());
+
+        if (!address.getUser().getId().equals(userId)) {
+            throw new RuntimeException("본인의 주소만 기본 설정할 수 있습니다.");
+        }
+
+        addressRepository.resetDefaultAddress(userId);
+
         address.setDefault(true);
         addressRepository.save(address);
     }
