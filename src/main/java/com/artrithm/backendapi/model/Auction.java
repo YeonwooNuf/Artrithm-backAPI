@@ -16,13 +16,16 @@ public class Auction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long auctionId;
+    private Long id;
+
+    @OneToOne(mappedBy = "auction", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private AuctionBid auctionBid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "artwork_id")
     private Artwork artwork;
 
-    @JoinColumn(name = "nickname")
+    @Column(name = "nickname")
     private String winnerNickname;
 
     private LocalDateTime startTime;
@@ -39,4 +42,9 @@ public class Auction {
 
     @Column(name = "payment_deadline")
     private LocalDateTime paymentDeadline;
+
+    // ✅ 결제 정보 연관관계 추가
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
 }

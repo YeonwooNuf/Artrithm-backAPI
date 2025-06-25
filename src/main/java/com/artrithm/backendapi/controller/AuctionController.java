@@ -36,34 +36,31 @@ public class AuctionController {
         if (ongoing.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        return ResponseEntity.ok(ongoing.get().getAuctionId());
+        return ResponseEntity.ok(ongoing.get().getId());
     }
 
-
     @GetMapping("/{id}")
-    public AuctionDto getAuction(@PathVariable Long id) {
+    public AuctionDto getAuction(@PathVariable("id") Long id) {
         return auctionService.getAuctionById(id);
     }
 
     @GetMapping("/bid/{id}")
-    public ResponseEntity<AuctionBidDto> getTop3(@PathVariable Long id){
+    public ResponseEntity<AuctionBidDto> getTop3(@PathVariable("id") Long id) {
         return ResponseEntity.ok(auctionService.getTop3(id));
     }
 
     @PostMapping("/{id}/finalize")
-    public ResponseEntity<Void> finalizeAuction(@PathVariable Long id){
+    public ResponseEntity<Void> finalizeAuction(@PathVariable("id") Long id) {
         auctionService.finalizeAuction(id);
         return ResponseEntity.ok().build();
     }
 
-    //경매 신청
     @PostMapping("/request")
     public ResponseEntity<String> createAuctionRequest(@RequestBody AuctionRequestDto dto) {
         auctionService.requestAuction(dto);
         return ResponseEntity.ok("경매 신청이 완료되었습니다.");
     }
 
-    //경매 신청 목록 조회
     @GetMapping("/admin/pending")
     public ResponseEntity<List<Map<String, Object>>> getPendingRequests() {
         List<AuctionRequest> requests = auctionRequestRepository.findByApproved(false);
@@ -81,7 +78,6 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
-    // 경매 등록
     @PostMapping("/admin/register")
     public ResponseEntity<String> registerAuction(@RequestBody AuctionRegisterDto dto) {
         try {
@@ -92,7 +88,6 @@ public class AuctionController {
         }
     }
 
-    // 최근 경매 낙찰 화면 보여줌
     @GetMapping("/latest-ended")
     public ResponseEntity<Object> getLatestEndedAuction() {
         Optional<Auction> optional = auctionService.getLatestEndedAuction();
@@ -105,7 +100,9 @@ public class AuctionController {
         }
     }
 
-
-
-
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<Void> cancelAuction(@PathVariable Long id) {
+        auctionService.markAuctionAsCancelled(id);
+        return ResponseEntity.ok().build();
+    }
 }
