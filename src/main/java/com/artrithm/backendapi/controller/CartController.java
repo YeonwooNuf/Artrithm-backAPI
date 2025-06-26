@@ -37,7 +37,6 @@ public class CartController {
         }
     }
 
-
     @GetMapping("/{userId}")
     public List<CartItemResponseDto> getUserCart(@PathVariable Long userId) {
         return cartService.getUserCart(userId).stream().map(CartItemResponseDto::fromEntity).collect(Collectors.toList());
