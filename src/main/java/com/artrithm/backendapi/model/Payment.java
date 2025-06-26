@@ -17,6 +17,10 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     // 어떤 결제인지 (구독 / 장바구니 / 경매)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
