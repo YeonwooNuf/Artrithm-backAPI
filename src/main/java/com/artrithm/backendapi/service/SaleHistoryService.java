@@ -36,6 +36,7 @@ public class SaleHistoryService {
                     .price(sale.getPrice())
                     .sellerNickname(sale.getSeller().getNickname())
                     .purchasedAt(sale.getPayment().getPaidAt())
+                    .method(PaymentTargetType.FIXED_ORDER) // 👈 고정가 구매
                     .build());
         }
 
@@ -51,6 +52,7 @@ public class SaleHistoryService {
                     .price(auction.getFinalPrice())
                     .sellerNickname(auction.getArtwork().getUser().getNickname())
                     .purchasedAt(auction.getPayment().getPaidAt())
+                    .method(PaymentTargetType.AUCTION_ORDER) // 👈 경매 구매
                     .build());
         }
 
