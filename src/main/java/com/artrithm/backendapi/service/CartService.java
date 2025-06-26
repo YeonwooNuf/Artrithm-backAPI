@@ -61,7 +61,19 @@ public class CartService {
      */
     @Transactional(readOnly = true)
     public List<CartItem> getUserCart(Long userId) {
-        return cartItemRepository.findByUserIdOrderByAddedAtDesc(userId);
+        return cartItemRepository.findByUserIdOrderByAddedAtDesc(userId).stream()
+                .filter(item -> {
+                    if (item.getType() == CartItemType.FIXED_PRICE) {
+                        return item.getArtwork().getSaleStatus() == SaleStatus.UNSOLD;
+                    } else if (item.getType() == CartItemType.AUCTION) {
+                        return item.getArtwork().getSaleStatus() == SaleStatus.PENDING &&
+                                item.getAuction() != null &&
+                                item.getAuction().getWinnerUserId() != null &&
+                                item.getAuction().getWinnerUserId().equals(item.getUser().getId().toString());
+                    }
+                    return false;
+                })
+                .toList();
     }
 
     /**
