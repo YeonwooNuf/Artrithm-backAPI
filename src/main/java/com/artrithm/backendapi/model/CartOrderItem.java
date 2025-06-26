@@ -25,7 +25,7 @@ public class CartOrderItem {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CartItemType type; // FIXED_PRICE or AUCTION
+    private CartItemType type;
 
     @ManyToOne
     @JoinColumn(name = "fixed_price_sale_id")
@@ -36,5 +36,10 @@ public class CartOrderItem {
     private Auction auction;
 
     @Column(nullable = false)
-    private Integer price; // 실제 결제된 금액
+    private Integer price;
+
+    // 장바구니 ID 추적용
+    @Column(name = "cart_item_id")
+    private Long cartItemId;
 }
+
