@@ -3,9 +3,6 @@ package com.artrithm.backendapi.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "fixed_price_sale")
 @Getter
@@ -36,4 +33,9 @@ public class FixedPriceSale {
 
     @Column(nullable = false)
     private Integer price;
+
+    // ✅ 결제 정보
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
 }
