@@ -12,7 +12,6 @@ import lombok.*;
 @Builder
 public class Artwork {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -43,5 +42,4 @@ public class Artwork {
     @Enumerated(EnumType.STRING)
     @Column(name = "sale_status")
     private SaleStatus saleStatus;
-
 }
