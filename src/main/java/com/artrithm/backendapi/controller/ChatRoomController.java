@@ -1,5 +1,6 @@
 package com.artrithm.backendapi.controller;
 
+import com.artrithm.backendapi.model.ChatMessage;
 import com.artrithm.backendapi.model.ChatRoom;
 import com.artrithm.backendapi.dto.ChatRoomDto;
 import com.artrithm.backendapi.service.ChatRoomService;
@@ -45,5 +46,11 @@ public class ChatRoomController {
     @GetMapping("/{roomId}/info")
     public ChatRoomDto getRoomInfo(@PathVariable String roomId, @RequestParam Long userId) {
         return chatRoomService.getRoomInfo(roomId, userId);
+    }
+
+    // 6. 채팅방별 메세지 조회
+    @GetMapping("/{roomId}/messages")
+    public List<ChatMessage> getMessagesForRoom(@PathVariable String roomId) {
+        return chatRoomService.getMessagesByRoomId(roomId);
     }
 }
