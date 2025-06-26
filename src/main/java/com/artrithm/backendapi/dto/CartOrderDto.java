@@ -6,26 +6,22 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Builder
 public class CartOrderDto {
-
     private Long id;
     private Long userId;
     private LocalDateTime orderedAt;
     private List<CartOrderItemDto> items;
     private Integer totalAmount;
 
-    public static CartOrderDto fromEntity(CartOrder order) {
+    public static CartOrderDto fromEntity(CartOrder order, List<CartOrderItemDto> itemDtos) {
         return CartOrderDto.builder()
                 .id(order.getId())
                 .userId(order.getUser().getId())
                 .orderedAt(order.getOrderedAt())
-                .items(order.getItems().stream()
-                        .map(CartOrderItemDto::fromEntity)
-                        .collect(Collectors.toList()))
+                .items(itemDtos)
                 .totalAmount(order.getTotalAmount())
                 .build();
     }
