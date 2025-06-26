@@ -20,4 +20,7 @@ public class PaymentRequestDto {
     private Long cartOrderId;
     private Long tierId;
     private Boolean isYearly;
+
+    // 위약금 결제용
+    private Long auctionId;
 }
