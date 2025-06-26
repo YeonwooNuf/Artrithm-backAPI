@@ -5,10 +5,8 @@ import com.artrithm.backendapi.model.*;
 import com.artrithm.backendapi.repository.*;
 
 import lombok.AllArgsConstructor;
-import lombok.Generated;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +21,10 @@ public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
     private final CartService cartService;
+
+    private final ArtworkRepository artworkRepository;
+    private final AuctionRequestRepository auctionRequestRepository;
+    private final PaymentRepository paymentRepository;
 
     @Getter
     @AllArgsConstructor
@@ -53,7 +55,7 @@ public class AuctionService {
                 : null;
 
         return AuctionDto.builder()
-                .id(auction.getAuctionId())
+                .id(auction.getId())
                 .startTime(auction.getStartTime())
                 .endTime(auction.getEndTime())
                 .startPrice(auction.getStartPrice())
@@ -70,16 +72,19 @@ public class AuctionService {
                 .build();
     }
 
-
     public void updateTop3(Long auctionId, String userId, int newPrice) {
-        //찾는데 처음이면 나머지 null이랑 0으로 채움
-        AuctionBid top = auctionBidRepository.findById(auctionId).orElseGet(()->
-                AuctionBid.builder().auctionId(auctionId)
-                .top1UserId(userId).top1Price(newPrice)
-                .top2UserId(null).top2Price(0)
-                .top3UserId(null).top3Price(0)
-                .build()
-        );
+        Auction auction = auctionRepository.findById(auctionId)
+                .orElseThrow(() -> new RuntimeException("경매를 찾을 수 없습니다."));
+
+        AuctionBid top = auctionBidRepository.findByAuction_Id(auctionId)
+                .orElseGet(() ->
+                        AuctionBid.builder()
+                                .auction(auction) // ✅ 연관관계로 설정
+                                .top1UserId(userId).top1Price(newPrice)
+                                .top2UserId(null).top2Price(0)
+                                .top3UserId(null).top3Price(0)
+                                .build()
+                );
 
         // 기존 top3 + 새 입찰 정보 추가
         List<BidInfo> bids = new ArrayList<>(List.of(
@@ -89,19 +94,17 @@ public class AuctionService {
                 new BidInfo(userId, newPrice)
         ));
 
-        // userId 기준 중복 제거 ( 최근 입찰 우선)
         Map<String, BidInfo> unique = new HashMap<>();
-        for (BidInfo b: bids){
-            if(b.getUserId() == null) continue;
-            unique.put(b.getUserId(),b);
+        for (BidInfo b : bids) {
+            if (b.getUserId() == null) continue;
+            unique.put(b.getUserId(), b);
         }
 
-        //가격 내림차순 정렬 후 상위 3개 추출
-        List<BidInfo> top3 = unique.values().stream().sorted((a,b)->b.getPrice()-a.getPrice())
+        List<BidInfo> top3 = unique.values().stream()
+                .sorted((a, b) -> b.getPrice() - a.getPrice())
                 .limit(3)
                 .toList();
 
-        //정렬된 top3 다시 설정
         top.setTop1UserId(getOrNull(top3, 0).userId);
         top.setTop1Price(getOrZero(top3, 0));
         top.setTop2UserId(getOrNull(top3, 1).userId);
@@ -109,27 +112,28 @@ public class AuctionService {
         top.setTop3UserId(getOrNull(top3, 2).userId);
         top.setTop3Price(getOrZero(top3, 2));
 
-        //auctionId 기준으로 있으면 update수행
         auctionBidRepository.save(top);
     }
 
-    public AuctionBidDto getTop3(Long auctionId){
-        AuctionBid top = auctionBidRepository.findById(auctionId).orElseThrow();
+    public AuctionBidDto getTop3(Long auctionId) {
+        AuctionBid bid = auctionBidRepository.findByAuction_Id(auctionId)
+                .orElseThrow(() -> new RuntimeException("입찰 정보가 없습니다."));
+
         return AuctionBidDto.builder()
-                .auctionId(top.getAuctionId())
-                .top1UserId(top.getTop1UserId()).top1Price(top.getTop1Price())
-                .top2UserId(top.getTop2UserId()).top2Price(top.getTop2Price())
-                .top3UserId(top.getTop3UserId()).top3Price(top.getTop3Price())
+                .auctionId(auctionId)
+                .top1UserId(bid.getTop1UserId()).top1Price(bid.getTop1Price())
+                .top2UserId(bid.getTop2UserId()).top2Price(bid.getTop2Price())
+                .top3UserId(bid.getTop3UserId()).top3Price(bid.getTop3Price())
                 .build();
     }
 
-    //낙찰 완료시
+    // 낙찰 완료시
     @Transactional
     public void finalizeAuction(Long auctionId) {
         Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new RuntimeException("해당 경매를 찾을 수 없습니다."));
 
-        Optional<AuctionBid> bidOpt = auctionBidRepository.findByAuctionId(auctionId);
+        Optional<AuctionBid> bidOpt = auctionBidRepository.findByAuction_Id(auctionId);
 
         if (bidOpt.isPresent() && bidOpt.get().getTop1UserId() != null) {
             AuctionBid bid = bidOpt.get();
@@ -150,9 +154,16 @@ public class AuctionService {
             artworkRepository.save(artwork);
 
             // 장바구니에 낙찰작품 추가
-            cartService.addToCart(winner.getId(), artwork.getId(), CartItemType.AUCTION, auction.getAuctionId(), null);
+            cartService.addToCart(winner.getId(), artwork.getId(), CartItemType.AUCTION, auction.getId(), null);
         } else {
-            System.out.println("❗ 입찰자가 없습니다. 유찰 처리");
+            // 상태를 유찰로 변경
+            auction.setStatus(AuctionStatus.CANCELLED);
+            auctionRepository.saveAndFlush(auction);
+
+            // 작품 상태 초기화 (판매 안됨 상태로)
+            Artwork artwork = auction.getArtwork();
+            artwork.setSaleStatus(null); // 혹은 SaleStatus.NONE 또는 미지정 상태
+            artworkRepository.save(artwork);
         }
 
         // 상태 종료로 변경
@@ -160,15 +171,7 @@ public class AuctionService {
         auctionRepository.saveAndFlush(auction);
     }
 
-
-
-
-
     //경매 신청
-    private final ArtworkRepository artworkRepository;
-    private final AuctionRequestRepository auctionRequestRepository;
-    private final CartItemRepository cartItemRepository;
-
     public void requestAuction(AuctionRequestDto dto) {
         Artwork artwork = artworkRepository.findById(dto.getArtworkId())
                 .orElseThrow(() -> new IllegalArgumentException("작품이 존재하지 않습니다."));
@@ -219,8 +222,86 @@ public class AuctionService {
                 .build();
 
         auctionRepository.save(auction);
+
+        // ✅ Auction 등록 후 Bid도 생성 (이게 빠져있어서 문제였음)
+        AuctionBid bid = AuctionBid.builder()
+                .auction(auction)
+                .top1UserId(null)
+                .top1Price(0)
+                .top2UserId(null)
+                .top2Price(0)
+                .top3UserId(null)
+                .top3Price(0)
+                .build();
+
+        auctionBidRepository.save(bid);
     }
 
+    @Transactional
+    public void markAuctionAsCancelled(Long auctionId) {
+        Auction auction = auctionRepository.findById(auctionId)
+                .orElseThrow(() -> new RuntimeException("해당 경매를 찾을 수 없습니다."));
+
+        if (auction.getStatus() != AuctionStatus.ONGOING) {
+            throw new IllegalStateException("진행 중인 경매가 아닙니다.");
+        }
+
+        Optional<AuctionBid> bidOpt = auctionBidRepository.findByAuction_Id(auctionId);
+        if (bidOpt.isPresent() && bidOpt.get().getTop1UserId() != null) {
+            throw new IllegalStateException("입찰자가 있는 경매는 유찰 처리할 수 없습니다.");
+        }
+
+        // 유찰 처리
+        auction.setStatus(AuctionStatus.CANCELLED);
+        auctionRepository.saveAndFlush(auction);
+
+        // 작품 상태 초기화
+        Artwork artwork = auction.getArtwork();
+        artwork.setSaleStatus(null); // ✅ saleStatus를 null로 초기화
+        artworkRepository.save(artwork);
+    }
+
+    @Transactional
+    public void handleOverdueAuctionPayments() {
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Auction> expired = auctionRepository.findAll().stream()
+                .filter(a -> a.getStatus() == AuctionStatus.ENDED)
+                .filter(a -> a.getWinnerUserId() != null)
+                .filter(a -> {
+                    Artwork artwork = a.getArtwork();
+                    return artwork.getSaleStatus() == SaleStatus.PENDING
+                            && a.getEndTime().plusHours(24).isBefore(now);
+                })
+                .toList();
+
+        for (Auction auction : expired) {
+            Artwork artwork = auction.getArtwork();
+
+            // 1. 작품 상태 초기화 → 재판매 가능
+            artwork.setSaleStatus(null);
+            artworkRepository.save(artwork);
+
+            // 2. 낙찰자 조회
+            String winnerIdStr = auction.getWinnerUserId();
+            if (winnerIdStr == null) continue;
+            Long winnerId = Long.valueOf(winnerIdStr);
+            User user = userRepository.findById(winnerId)
+                    .orElseThrow(() -> new RuntimeException("낙찰자 정보를 찾을 수 없습니다."));
+
+            // 3. 패널티 결제 생성
+            Payment penalty = Payment.builder()
+                    .user(user) // ✅ 연관관계로 바꿨다면
+                    .targetType(PaymentTargetType.PENALTY)
+                    .paymentMethod("NONE") // 아직 결제 안됨
+                    .paymentId("penalty-" + UUID.randomUUID())
+                    .totalAmount(5000) // 예시: 5,000원
+                    .paidAt(null) // 아직 미결제
+                    .build();
+
+            paymentRepository.save(penalty);
+        }
+    }
 
     public Optional<Auction> getOngoingAuction() {
         return auctionRepository.findFirstByStatusOrderByStartTimeDesc(AuctionStatus.ONGOING);
@@ -230,8 +311,6 @@ public class AuctionService {
         return auctionRepository.findFirstByStatusOrderByEndTimeDesc(AuctionStatus.ENDED);
     }
 
-
-
     public List<AuctionRequest> getUnapprovedRequests() {
         return auctionRequestRepository.findByApproved(false);
     }
@@ -239,5 +318,4 @@ public class AuctionService {
     public List<Auction> getOngoingAuctions(){
         return auctionRepository.findByStatus(AuctionStatus.ONGOING);
     }
-
 }

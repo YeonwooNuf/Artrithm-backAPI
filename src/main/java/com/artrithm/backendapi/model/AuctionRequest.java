@@ -25,6 +25,4 @@ public class AuctionRequest {
     private int startPrice;
 
     private boolean approved = false;
-
-
 }
