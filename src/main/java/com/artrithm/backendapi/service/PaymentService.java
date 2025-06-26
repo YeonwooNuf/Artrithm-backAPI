@@ -22,6 +22,8 @@ public class PaymentService {
     private final CartItemRepository cartItemRepository;
     private final ArtworkRepository artworkRepository;
     private final FixedPriceSaleRepository fixedPriceSaleRepository;
+    private final AuctionRepository auctionRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public PaymentDto processPayment(PaymentRequestDto dto) {
@@ -30,10 +32,14 @@ public class PaymentService {
         return switch (type) {
             case SUBSCRIPTION -> handleSubscriptionPayment(dto);
             case FIXED_ORDER, AUCTION_ORDER -> handleCartOrderPayment(dto);
+            case PENALTY -> handlePenaltyPayment(dto);
         };
     }
 
     private PaymentDto handleSubscriptionPayment(PaymentRequestDto dto) {
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
         UserSubscription subscription = subscriptionPaymentService.processSubscriptionPayment(
                 dto.getUserId(),
                 dto.getTierId(),
@@ -42,6 +48,7 @@ public class PaymentService {
         );
 
         Payment payment = Payment.builder()
+                .user(user)
                 .cartOrder(null)
                 .subscription(subscription)
                 .targetType(PaymentTargetType.SUBSCRIPTION)
@@ -69,13 +76,13 @@ public class PaymentService {
                 cartItemRepository.deleteAllByIdIn(cartItemIdsToDelete);
             }
 
-            // 결제 유형
-            PaymentTargetType targetType = dto.getPaymentType().equals("AUCTION")
-                    ? PaymentTargetType.AUCTION_ORDER
-                    : PaymentTargetType.FIXED_ORDER;
+            PaymentTargetType targetType = dto.getPaymentType();
 
-            // 결제 저장
+            // ✅ 반드시 user 설정
+            User user = cartOrder.getUser();
+
             Payment payment = Payment.builder()
+                    .user(user)
                     .cartOrder(cartOrder)
                     .targetType(targetType)
                     .totalAmount(dto.getTotalAmount())
@@ -94,15 +101,22 @@ public class PaymentService {
                 artwork.setSaleStatus(SaleStatus.SOLD);
                 artworkRepository.save(artwork);
 
-                // 🔽 구매자 + 결제 정보 모두 저장
+                // 👇 고정가 구매 처리
                 fixedPriceSaleRepository.findByArtworkId(artwork.getId())
                         .ifPresent(sale -> {
                             if (sale.getBuyer() == null) {
-                                sale.setBuyer(cartOrder.getUser());
+                                sale.setBuyer(user);
                             }
-                            sale.setPayment(savedPayment); // ✅ 추가된 부분
+                            sale.setPayment(savedPayment);
                             fixedPriceSaleRepository.save(sale);
                         });
+
+                // ✅ 경매 낙찰 작품이면 auction도 업데이트
+                if (item.getAuction() != null) {
+                    Auction auction = item.getAuction();
+                    auction.setPayment(savedPayment);
+                    auctionRepository.save(auction);
+                }
             }
 
             return PaymentDto.fromEntity(savedPayment);
@@ -111,6 +125,37 @@ public class PaymentService {
             handlePaymentFailure(cartOrder);
             throw new RuntimeException("결제 처리 중 오류가 발생했습니다. 주문이 취소되었습니다.", e);
         }
+    }
+
+    private PaymentDto handlePenaltyPayment(PaymentRequestDto dto) {
+        Auction auction = auctionRepository.findById(dto.getAuctionId())
+                .orElseThrow(() -> new IllegalArgumentException("경매 정보를 찾을 수 없습니다."));
+
+        // winnerUserId → Long으로 변환 후 조회
+        if (auction.getWinnerUserId() == null)
+            throw new IllegalStateException("낙찰자 정보가 없습니다.");
+
+        Long userId = Long.parseLong(auction.getWinnerUserId());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("낙찰자를 찾을 수 없습니다."));
+
+        Payment penaltyPayment = Payment.builder()
+                .user(user)
+                .cartOrder(null)
+                .subscription(null)
+                .targetType(PaymentTargetType.PENALTY)
+                .totalAmount(dto.getTotalAmount())
+                .paymentMethod(dto.getPaymentMethod())
+                .paymentId(dto.getPaymentId())
+                .paidAt(LocalDateTime.now())
+                .build();
+
+        Payment saved = paymentRepository.save(penaltyPayment);
+
+        auction.setPayment(saved);
+        auctionRepository.save(auction);
+
+        return PaymentDto.fromEntity(saved);
     }
 
     private void handlePaymentFailure(CartOrder cartOrder) {
