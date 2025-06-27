@@ -99,4 +99,8 @@ public class ChatRoomService {
                 .otherProfileImage(otherUser.getProfileImage())
                 .build();
     }
+
+    public List<ChatMessage> getMessagesByRoomId(String roomId) {
+        return chatMessageRepository.findByRoomIdOrderBySentAtAsc(roomId);
+    }
 }

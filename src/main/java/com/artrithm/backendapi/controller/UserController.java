@@ -1,6 +1,8 @@
 package com.artrithm.backendapi.controller;
 
 import com.artrithm.backendapi.dto.UserDto;
+import com.artrithm.backendapi.model.User;
+import com.artrithm.backendapi.repository.UserRepository;
 import com.artrithm.backendapi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody UserDto userDto) {
@@ -40,5 +43,13 @@ public class UserController {
 
         userService.updateUserInfo(userId, userDto);
         return ResponseEntity.ok("회원 정보가 성공적으로 수정되었습니다.");
+    }
+
+    // 관리자 id 조회
+    @GetMapping("/admin-id")
+    public ResponseEntity<Long> getAdminUserId() {
+        User admin = userRepository.findFirstByRole(User.Role.ADMIN)
+                .orElseThrow(() -> new RuntimeException("관리자 계정을 찾을 수 없습니다."));
+        return ResponseEntity.ok(admin.getId());
     }
 }
