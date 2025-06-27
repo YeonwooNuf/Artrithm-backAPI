@@ -4,6 +4,7 @@ import com.artrithm.backendapi.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,6 +21,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 로그인 시 아이디로 조회
     Optional<User> findByLoginId(String loginId);
+
+    // 작가 승인된 User만 불러오기
+    List<User> findByIsArtistApprovedTrue();
 
     // 관리자 id 값 role 기반으로 조회
     Optional<User> findFirstByRole(User.Role role);
