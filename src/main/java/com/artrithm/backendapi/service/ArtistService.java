@@ -1,6 +1,7 @@
 package com.artrithm.backendapi.service;
 
 import com.artrithm.backendapi.dto.ArtistDto;
+import com.artrithm.backendapi.dto.ArtworkDto;
 import com.artrithm.backendapi.model.Artist;
 import com.artrithm.backendapi.repository.ArtistRepository;
 import lombok.RequiredArgsConstructor;
@@ -64,6 +65,13 @@ public class ArtistService {
                 .nationality(artist.getNationality())
                 .birthDate(artist.getBirthDate())
                 .deathDate(artist.getDeathDate())
+                .artworks(
+                        artist.getArtworks() != null
+                                ? artist.getArtworks().stream()
+                                .map(artwork -> ArtworkDto.fromEntity(artwork))
+                                .toList()
+                                : List.of()
+                )
                 .build();
     }
 }

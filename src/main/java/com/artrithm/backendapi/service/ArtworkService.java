@@ -82,6 +82,12 @@ public class ArtworkService {
                 .collect(Collectors.toList());
     }
 
+    public List<ArtworkDto> getAllMyArtworks(Long userId) {
+        return artworkRepository.findByUserId(userId).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
     private ArtworkDto convertToDto(Artwork artwork){
         return ArtworkDto.builder()
                 .id(artwork.getId())

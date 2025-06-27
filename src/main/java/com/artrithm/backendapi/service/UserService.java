@@ -1,5 +1,6 @@
 package com.artrithm.backendapi.service;
 
+import com.artrithm.backendapi.dto.ArtworkDto;
 import com.artrithm.backendapi.dto.UserDto;
 import com.artrithm.backendapi.model.User;
 import com.artrithm.backendapi.repository.UserRepository;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -139,5 +141,20 @@ public class UserService {
                 .artistBio(savedUser.getArtistBio())
                 .profileImage(savedUser.getProfileImage())
                 .build();
+    }
+
+    // 작가 유저만 가져오기
+    public List<UserDto> getAllApprovedUserArtists(){
+        List<User> approvedUsers = userRepository.findByIsArtistApprovedTrue();
+        return approvedUsers.stream().map(user -> UserDto.builder()
+                        .id(user.getId())
+                        .nickname(user.getNickname())
+                        .artistBio(user.getArtistBio())
+                        .profileImage(user.getProfileImage())
+                        .artworks(user.getArtworks().stream()
+                                .map(ArtworkDto::fromEntity)
+                                .toList())
+                        .build())
+                .toList();
     }
 }

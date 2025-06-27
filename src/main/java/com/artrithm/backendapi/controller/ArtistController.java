@@ -1,7 +1,10 @@
 package com.artrithm.backendapi.controller;
 
+import com.artrithm.backendapi.dto.ArtistDisplayDto;
 import com.artrithm.backendapi.dto.ArtistDto;
+import com.artrithm.backendapi.dto.UserDto;
 import com.artrithm.backendapi.service.ArtistService;
+import com.artrithm.backendapi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -11,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/artists")
@@ -18,6 +22,7 @@ import java.util.List;
 public class ArtistController {
 
     private final ArtistService artistService;
+    private final UserService userService;
 
     // ✅ 전체 작가 목록 조회
     @GetMapping
@@ -59,4 +64,16 @@ public class ArtistController {
 
         return ResponseEntity.ok(artistService.createArtist(dto));
     }
+
+    @GetMapping("/all")
+    public List<ArtistDisplayDto> getAllArtistsForDisplay() {
+        List<ArtistDto> artistDtos = artistService.getAllArtists(); // Artist 테이블 전용
+        List<UserDto> userDtos = userService.getAllApprovedUserArtists();  // isArtistApproved == true
+
+        return Stream.concat(
+                artistDtos.stream().map(ArtistDisplayDto::fromArtistDto),
+                userDtos.stream().map(ArtistDisplayDto::fromUserDto)
+        ).toList();
+    }
+
 }
