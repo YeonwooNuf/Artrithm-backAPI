@@ -1,6 +1,7 @@
 package com.artrithm.backendapi.service;
 
 import com.artrithm.backendapi.dto.PaymentDto;
+import com.artrithm.backendapi.dto.PaymentReceiptDto;
 import com.artrithm.backendapi.dto.PaymentRequestDto;
 import com.artrithm.backendapi.model.*;
 import com.artrithm.backendapi.repository.*;
@@ -56,6 +57,7 @@ public class PaymentService {
                 .paymentMethod(dto.getPaymentMethod())
                 .paymentId(dto.getPaymentId())
                 .paidAt(LocalDateTime.now())
+                .commissionRate(0)
                 .build();
 
         return PaymentDto.fromEntity(paymentRepository.save(payment));
@@ -66,7 +68,6 @@ public class PaymentService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다."));
 
         try {
-            // ✅ cartItem 삭제
             List<Long> cartItemIdsToDelete = cartOrder.getItems().stream()
                     .map(CartOrderItem::getCartItemId)
                     .filter(id -> id != null)
@@ -76,19 +77,28 @@ public class PaymentService {
                 cartItemRepository.deleteAllByIdIn(cartItemIdsToDelete);
             }
 
-            PaymentTargetType targetType = dto.getPaymentType();
-
-            // ✅ 반드시 user 설정
             User user = cartOrder.getUser();
+
+            float rate = 0.1f;
+            if (!cartOrder.getItems().isEmpty()) {
+                Artwork firstArtwork = cartOrder.getItems().get(0).getArtwork();
+                User seller = firstArtwork.getUser();
+                rate = seller.getSubscriptions().stream()
+                        .filter(UserSubscription::getIsActive)
+                        .map(sub -> sub.getTier().getCommissionRate())
+                        .findFirst()
+                        .orElse(0.1f);
+            }
 
             Payment payment = Payment.builder()
                     .user(user)
                     .cartOrder(cartOrder)
-                    .targetType(targetType)
+                    .targetType(dto.getPaymentType())
                     .totalAmount(dto.getTotalAmount())
                     .paymentMethod(dto.getPaymentMethod())
                     .paymentId(dto.getPaymentId())
                     .paidAt(LocalDateTime.now())
+                    .commissionRate(rate)
                     .build();
 
             Payment savedPayment = paymentRepository.save(payment);
@@ -96,12 +106,9 @@ public class PaymentService {
             for (CartOrderItem item : cartOrder.getItems()) {
                 Artwork artwork = artworkRepository.findById(item.getArtwork().getId())
                         .orElseThrow(() -> new IllegalArgumentException("작품을 찾을 수 없습니다."));
-
-                // 작품 상태 변경
                 artwork.setSaleStatus(SaleStatus.SOLD);
                 artworkRepository.save(artwork);
 
-                // 👇 고정가 구매 처리
                 fixedPriceSaleRepository.findByArtworkId(artwork.getId())
                         .ifPresent(sale -> {
                             if (sale.getBuyer() == null) {
@@ -111,7 +118,6 @@ public class PaymentService {
                             fixedPriceSaleRepository.save(sale);
                         });
 
-                // ✅ 경매 낙찰 작품이면 auction도 업데이트
                 if (item.getAuction() != null) {
                     Auction auction = item.getAuction();
                     auction.setPayment(savedPayment);
@@ -131,7 +137,6 @@ public class PaymentService {
         Auction auction = auctionRepository.findById(dto.getAuctionId())
                 .orElseThrow(() -> new IllegalArgumentException("경매 정보를 찾을 수 없습니다."));
 
-        // winnerUserId → Long으로 변환 후 조회
         if (auction.getWinnerUserId() == null)
             throw new IllegalStateException("낙찰자 정보가 없습니다.");
 
@@ -148,10 +153,10 @@ public class PaymentService {
                 .paymentMethod(dto.getPaymentMethod())
                 .paymentId(dto.getPaymentId())
                 .paidAt(LocalDateTime.now())
+                .commissionRate(0)
                 .build();
 
         Payment saved = paymentRepository.save(penaltyPayment);
-
         auction.setPayment(saved);
         auctionRepository.save(auction);
 
@@ -161,5 +166,28 @@ public class PaymentService {
     private void handlePaymentFailure(CartOrder cartOrder) {
         cartOrderItemRepository.deleteByCartOrder(cartOrder);
         cartOrderRepository.delete(cartOrder);
+    }
+
+    @Transactional
+    public PaymentReceiptDto getPaymentReceipt(String paymentId) {
+        Payment payment = paymentRepository.findByPaymentId(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("❌ 결제 정보를 찾을 수 없습니다: " + paymentId));
+
+        PaymentReceiptDto baseDto = PaymentReceiptDto.from(payment);
+
+        if (payment.getTargetType() == PaymentTargetType.FIXED_ORDER || payment.getTargetType() == PaymentTargetType.AUCTION_ORDER) {
+            List<CartOrderItem> items = payment.getCartOrder().getItems();
+            if (!items.isEmpty()) {
+                Float commissionRate = payment.getCommissionRate() != 0 ? payment.getCommissionRate() : 0.1f;
+                int commissionAmount = Math.round(baseDto.getTotalAmount() * commissionRate);
+                int payoutAmount = baseDto.getTotalAmount() - commissionAmount;
+
+                baseDto.setCommissionRate(commissionRate);
+                baseDto.setCommissionAmount(commissionAmount);
+                baseDto.setPayoutAmount(payoutAmount);
+            }
+        }
+
+        return baseDto;
     }
 }
