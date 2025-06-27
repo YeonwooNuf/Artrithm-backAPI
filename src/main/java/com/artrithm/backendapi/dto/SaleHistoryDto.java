@@ -15,4 +15,5 @@ public class SaleHistoryDto {
     private String buyerNickname;
     private LocalDateTime soldAt; // ISO or "yyyy-MM-dd HH:mm" 등
     private String status; // ✅ "판매중", "결제대기", "판매완료" 등 상태 추가
+    private String paymentId;  // ✅ 결제 상세 페이지로 이동하기 위한 ID
 }
