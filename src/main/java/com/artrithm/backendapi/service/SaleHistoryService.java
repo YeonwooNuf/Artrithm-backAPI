@@ -36,6 +36,7 @@ public class SaleHistoryService {
                     .price(sale.getPrice())
                     .sellerNickname(sale.getSeller().getNickname())
                     .purchasedAt(sale.getPayment().getPaidAt())
+                    .paymentId(sale.getPayment().getPaymentId())
                     .method(PaymentTargetType.FIXED_ORDER) // 👈 고정가 구매
                     .build());
         }
@@ -52,10 +53,10 @@ public class SaleHistoryService {
                     .price(auction.getFinalPrice())
                     .sellerNickname(auction.getArtwork().getUser().getNickname())
                     .purchasedAt(auction.getPayment().getPaidAt())
+                    .paymentId(auction.getPayment().getPaymentId())
                     .method(PaymentTargetType.AUCTION_ORDER) // 👈 경매 구매
                     .build());
         }
-
         return result;
     }
 
@@ -109,6 +110,7 @@ public class SaleHistoryService {
                             .buyerNickname(sale.getBuyer().getNickname())
                             .status("판매완료")
                             .soldAt(sale.getPayment().getPaidAt())
+                            .paymentId(sale.getPayment().getPaymentId())
                             .build());
                 } else {
                     // 경매 판매
@@ -122,6 +124,7 @@ public class SaleHistoryService {
                                 .buyerNickname(auction.getWinnerNickname())
                                 .status("판매완료")
                                 .soldAt(auction.getPayment().getPaidAt())
+                                .paymentId(auction.getPayment().getPaymentId())
                                 .build());
                     }
                 }

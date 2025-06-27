@@ -18,6 +18,8 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
 
     List<UserSubscription> findAllByUser(User user);
 
+    long countByIsActive(boolean isActive); // ✅ 현재 구독 중인 유저 수 조회
+
     @Modifying
     @Transactional
     @Query("UPDATE UserSubscription us SET us.isActive = false WHERE us.user.id = :userId AND us.isActive = true")

@@ -49,4 +49,7 @@ public class Payment {
     // 결제 시각
     @Column(nullable = false)
     private LocalDateTime paidAt;
+
+    @Column(nullable = false)
+    private float commissionRate; // 결제 시점의 수수료율
 }

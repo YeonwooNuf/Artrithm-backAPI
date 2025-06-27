@@ -14,6 +14,7 @@ public class PurchaseHistoryDto {
     private String artworkImageUrl;
     private Integer price;
     private String sellerNickname;
-    private LocalDateTime purchasedAt; // ISO or "yyyy-MM-dd HH:mm" 등
-    private PaymentTargetType method;
+    private LocalDateTime purchasedAt;
+    private PaymentTargetType method; // "AUCTION" 또는 "FIXED"
+    private String paymentId;         // ✅ 영수증 상세 페이지 이동용
 }
