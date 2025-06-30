@@ -1,6 +1,8 @@
 package com.artrithm.backendapi.dto;
 
 import com.artrithm.backendapi.model.Exhibition;
+import com.artrithm.backendapi.model.Keyword;
+import com.artrithm.backendapi.search.document.ExhibitionDocument;
 import lombok.*;
 
 import java.util.List;
@@ -39,7 +41,13 @@ public class ExhibitionDto {
                 .description(exhibition.getDescription())
                 .theme(exhibition.getTheme())
                 .thumbnailUrl(exhibition.getThumbnailUrl())
-                .keywords(exhibition.getKeywords())
+                .keywords(
+                        exhibition.getKeywords() != null
+                                ? exhibition.getKeywords().stream()
+                                .map(Keyword::getName)
+                                .toList()
+                                : List.of()
+                )
                 .authorId(exhibition.getAuthor().getId())
                 .authorNickname(exhibition.getAuthor().getNickname())
                 .authorProfileImage(exhibition.getAuthor().getProfileImage()) // ✅
@@ -63,6 +71,17 @@ public class ExhibitionDto {
                                 ? ArtistDto.fromEntity(exhibition.getArtist())
                                 : null
                 )
+                .build();
+    }
+
+    public static ExhibitionDto fromDocument(ExhibitionDocument doc) {
+        return ExhibitionDto.builder()
+                .id(doc.getId())
+                .title(doc.getTitle())
+                .description(doc.getDescription())
+                .thumbnailUrl(doc.getThumbnailUrl())
+                .keywords(doc.getKeywords())
+                .authorId(doc.getAuthorId())
                 .build();
     }
 }
