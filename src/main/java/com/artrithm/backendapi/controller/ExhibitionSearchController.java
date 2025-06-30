@@ -28,7 +28,7 @@ public class ExhibitionSearchController {
 
     // ✅ 전시 ID 기반 유사 전시 추천
     @GetMapping("/recommend/{exhibitionId}")
-    public List<ExhibitionDocument> recommendByExhibitionId(@PathVariable Long exhibitionId) {
+    public List<ExhibitionDocument> recommendByExhibitionId(@PathVariable("exhibitionId") Long exhibitionId) {
         return searchService.recommendSimilarToExhibition(exhibitionId);
     }
 }
