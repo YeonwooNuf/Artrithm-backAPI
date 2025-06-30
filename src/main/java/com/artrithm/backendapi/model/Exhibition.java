@@ -32,10 +32,19 @@ public class Exhibition {
     @Column(nullable = false)
     private String thumbnailUrl;
 
-    @ElementCollection
-    @CollectionTable(name = "exhibition_keywords", joinColumns = @JoinColumn(name = "exhibition_id"))
-    @Column(name = "keyword")
-    private List<String> keywords;
+//    @ElementCollection
+//    @CollectionTable(name = "exhibition_keywords", joinColumns = @JoinColumn(name = "exhibition_id"))
+//    @Column(name = "keyword")
+//    private List<String> keywords;
+
+    @ManyToMany
+    @JoinTable(
+            name = "exhibition_keywords",
+            joinColumns = @JoinColumn(name = "exhibition_id"),
+            inverseJoinColumns = @JoinColumn(name = "keyword_id")
+    )
+
+    private List<Keyword> keywords;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "artist_id") // Nullable: 명화 전시에만 설정됨
