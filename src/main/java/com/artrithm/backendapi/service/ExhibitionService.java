@@ -1,16 +1,9 @@
 package com.artrithm.backendapi.service;
 
-import com.artrithm.backendapi.dto.ArtistDto;
 import com.artrithm.backendapi.dto.ArtworkDto;
 import com.artrithm.backendapi.dto.ExhibitionDto;
-import com.artrithm.backendapi.model.Artist;
-import com.artrithm.backendapi.model.Artwork;
-import com.artrithm.backendapi.model.Exhibition;
-import com.artrithm.backendapi.model.User;
-import com.artrithm.backendapi.repository.ArtistRepository;
-import com.artrithm.backendapi.repository.ArtworkRepository;
-import com.artrithm.backendapi.repository.ExhibitionRepository;
-import com.artrithm.backendapi.repository.UserRepository;
+import com.artrithm.backendapi.model.*;
+import com.artrithm.backendapi.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +23,7 @@ public class ExhibitionService {
     private final UserRepository userRepository;
     private final FileUploadService fileUploadService;
     private final ArtistRepository artistRepository;
+    private final KeywordRepository keywordRepository;
 
     public void updateExhibition(Long exhibitionId, MultipartHttpServletRequest request) throws IOException {
         Exhibition exhibition = exhibitionRepository.findById(exhibitionId)
@@ -55,15 +49,17 @@ public class ExhibitionService {
             }
         }
 
-        List<String> keywords = new ArrayList<>();
+        List<Keyword> keywordEntities = new ArrayList<>();
         int kwIndex = 0;
         while (true) {
             String kw = request.getParameter("keywords[" + kwIndex + "]");
             if (kw == null) break;
-            keywords.add(kw);
+            Keyword keyword = keywordRepository.findByName(kw)
+                    .orElseGet(() -> keywordRepository.save(Keyword.builder().name(kw).build()));
+            keywordEntities.add(keyword);
             kwIndex++;
         }
-        exhibition.setKeywords(keywords);
+        exhibition.setKeywords(keywordEntities);
 
         if (isAdmin) {
             String artistIdStr = request.getParameter("artistId");
@@ -75,7 +71,6 @@ public class ExhibitionService {
             }
         }
 
-        // 기존 작품 clear 후 새로 채우기 (orphanRemoval 대응)
         exhibition.getArtworks().clear();
 
         int workIndex = 0;
@@ -119,12 +114,14 @@ public class ExhibitionService {
         MultipartFile thumbnail = request.getFile("thumbnail");
         String thumbnailUrl = fileUploadService.saveFile(thumbnail, "thumbnails");
 
-        List<String> keywords = new ArrayList<>();
+        List<Keyword> keywordEntities = new ArrayList<>();
         int kwIndex = 0;
         while (true) {
             String kw = request.getParameter("keywords[" + kwIndex + "]");
             if (kw == null) break;
-            keywords.add(kw);
+            Keyword keyword = keywordRepository.findByName(kw)
+                    .orElseGet(() -> keywordRepository.save(Keyword.builder().name(kw).build()));
+            keywordEntities.add(keyword);
             kwIndex++;
         }
 
@@ -134,7 +131,7 @@ public class ExhibitionService {
                 .description(description)
                 .theme(theme)
                 .thumbnailUrl(thumbnailUrl)
-                .keywords(keywords)
+                .keywords(keywordEntities)
                 .build();
 
         String artistIdStr = request.getParameter("artistId");
@@ -161,8 +158,8 @@ public class ExhibitionService {
                     .description(workDesc)
                     .imageUrl(workImgUrl)
                     .exhibition(exhibition)
-                    .user(user)  // ✅ 업로더 지정!
-                    .artist(exhibition.getArtist())  // ✅ 명화 전시일 경우, artist도 함께 지정
+                    .user(user)
+                    .artist(exhibition.getArtist())
                     .build();
 
             artworkRepository.save(artwork);
@@ -188,7 +185,7 @@ public class ExhibitionService {
     }
 
     private ExhibitionDto toDto(Exhibition exhibition) {
-        return ExhibitionDto.fromEntity(exhibition); // ✅ 이렇게 변경!
+        return ExhibitionDto.fromEntity(exhibition);
     }
 
     private ArtworkDto toArtworkDto(Artwork artwork) {
