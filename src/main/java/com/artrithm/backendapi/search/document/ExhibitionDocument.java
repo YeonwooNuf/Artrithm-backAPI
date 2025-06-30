@@ -3,6 +3,8 @@ package com.artrithm.backendapi.search.document;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.List;
 
@@ -20,6 +22,7 @@ public class ExhibitionDocument {
     private String title;
     private String description;
 
+    @Field(type = FieldType.Text, analyzer = "standard")
     private List<String> keywords;
 
     // 필요한 경우 추가 필드
