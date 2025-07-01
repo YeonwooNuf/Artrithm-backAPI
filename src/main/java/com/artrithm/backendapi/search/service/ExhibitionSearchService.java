@@ -41,13 +41,21 @@ public class ExhibitionSearchService {
     /**
      * 단일 키워드 기반 유사 전시 추천
      */
-    public List<ExhibitionDocument> recommendByKeywordContext(String keyword) {
-        Query query = MoreLikeThisQuery.of(m -> m
-                .fields("keywords", "description")
-                .like(l -> l.text(keyword))
-                .minTermFreq(1)
-                .minDocFreq(1)
-        )._toQuery();
+    public List<ExhibitionDocument> recommendByKeywordContext(List<String> keywords) {
+        Query query = Query.of(q -> q
+                .bool(b -> b
+                        .should(
+                                keywords.stream()
+                                        .map(kw -> MoreLikeThisQuery.of(m -> m
+                                                .fields("keywords", "description")
+                                                .like(l -> l.text(kw))
+                                                .minTermFreq(1)
+                                                .minDocFreq(1)
+                                        )._toQuery())
+                                        .collect(Collectors.toList())
+                        )
+                )
+        );
 
         NativeQuery searchQuery = NativeQuery.builder()
                 .withQuery(query)
@@ -56,6 +64,7 @@ public class ExhibitionSearchService {
         SearchHits<ExhibitionDocument> hits = elasticsearchTemplate.search(searchQuery, ExhibitionDocument.class);
         return hits.stream().map(SearchHit::getContent).collect(Collectors.toList());
     }
+
 
     /**
      * 전시 ID 기준 유사 전시 추천
