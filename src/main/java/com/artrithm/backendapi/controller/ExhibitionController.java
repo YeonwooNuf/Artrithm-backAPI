@@ -49,4 +49,10 @@ public class ExhibitionController {
             return ResponseEntity.ok(exhibitionService.getAllExhibitions());
         }
     }
+
+    // 전시 ID 목록으로 여러 전시 조회
+    @GetMapping("/by-ids")
+    public ResponseEntity<List<ExhibitionDto>> getExhibitionsByIds(@RequestParam List<Long> ids) {
+        return ResponseEntity.ok(exhibitionService.getExhibitionsByIds(ids));
+    }
 }
