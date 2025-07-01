@@ -2,6 +2,7 @@ package com.artrithm.backendapi.repository;
 
 import com.artrithm.backendapi.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -27,4 +28,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 관리자 id 값 role 기반으로 조회
     Optional<User> findFirstByRole(User.Role role);
+
+    @Query("""
+                SELECT us.user
+                FROM UserSubscription us
+                WHERE us.isActive = true
+                AND us.user.isArtistApproved = true
+            """)
+    List<User> findSubscribedArtists();
+
 }
