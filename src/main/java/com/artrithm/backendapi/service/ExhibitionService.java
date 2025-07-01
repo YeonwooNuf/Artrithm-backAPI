@@ -1,6 +1,5 @@
 package com.artrithm.backendapi.service;
 
-import com.artrithm.backendapi.dto.ArtworkDto;
 import com.artrithm.backendapi.dto.ExhibitionDto;
 import com.artrithm.backendapi.model.*;
 import com.artrithm.backendapi.repository.*;
@@ -184,16 +183,13 @@ public class ExhibitionService {
                 .collect(Collectors.toList());
     }
 
-    private ExhibitionDto toDto(Exhibition exhibition) {
-        return ExhibitionDto.fromEntity(exhibition);
+    public List<ExhibitionDto> getExhibitionsByIds(List<Long> ids) {
+        return exhibitionRepository.findAllById(ids).stream()
+                .map(ExhibitionDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
-    private ArtworkDto toArtworkDto(Artwork artwork) {
-        return ArtworkDto.builder()
-                .id(artwork.getId())
-                .title(artwork.getTitle())
-                .description(artwork.getDescription())
-                .imageUrl(artwork.getImageUrl())
-                .build();
+    private ExhibitionDto toDto(Exhibition exhibition) {
+        return ExhibitionDto.fromEntity(exhibition);
     }
 }
