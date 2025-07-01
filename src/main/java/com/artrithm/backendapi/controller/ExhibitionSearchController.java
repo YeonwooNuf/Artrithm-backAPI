@@ -22,7 +22,7 @@ public class ExhibitionSearchController {
 
     // ✅ 단일 키워드 기반 추천
     @GetMapping("/recommend")
-    public List<ExhibitionDocument> recommendByKeyword(@RequestParam String keyword) {
+    public List<ExhibitionDocument> recommendByKeyword(@RequestParam("keyword") List<String> keyword) {
         return searchService.recommendByKeywordContext(keyword);
     }
 
