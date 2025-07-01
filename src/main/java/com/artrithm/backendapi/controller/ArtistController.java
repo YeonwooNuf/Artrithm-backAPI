@@ -75,5 +75,4 @@ public class ArtistController {
                 userDtos.stream().map(ArtistDisplayDto::fromUserDto)
         ).toList();
     }
-
 }
