@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ArtistDisplayDto {
-    private Long id;
+    private String id;
     private String name; // name or nickname
     private String bio;  // bio or artistBio
     private String profileImage;
@@ -19,7 +19,7 @@ public class ArtistDisplayDto {
 
     public static ArtistDisplayDto fromArtistDto(ArtistDto a) {
         return ArtistDisplayDto.builder()
-                .id(a.getId())
+                .id("Artist_" + a.getId())
                 .name(a.getName())
                 .bio(a.getBio())
                 .profileImage(a.getProfileImage())
@@ -30,7 +30,7 @@ public class ArtistDisplayDto {
 
     public static ArtistDisplayDto fromUserDto(UserDto u) {
         return ArtistDisplayDto.builder()
-                .id(u.getId())
+                .id("User_" + u.getId())
                 .name(u.getNickname())
                 .bio(u.getArtistBio())
                 .profileImage(u.getProfileImage())
