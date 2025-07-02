@@ -1,6 +1,6 @@
 package com.artrithm.backendapi.controller;
 
-import com.artrithm.backendapi.dto.FixedPriceArtistGroupDto;
+import com.artrithm.backendapi.dto.FixedPriceArtworkDto;
 import com.artrithm.backendapi.dto.FixedPriceSaleDto;
 import com.artrithm.backendapi.service.FixedPriceSaleService;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +17,11 @@ public class FixedPriceSaleController {
     private final FixedPriceSaleService fixedPriceSaleService;
 
     /**
-     * 작가별 판매 작품 묶음 조회
+     * 판매 작품 전체 조회
      */
-    @GetMapping("/all-grouped")
-    public List<FixedPriceArtistGroupDto> getAllGroupedSales() {
-        return fixedPriceSaleService.getGroupedFixedPriceSales();
+    @GetMapping("/all")
+    public ResponseEntity<List<FixedPriceArtworkDto>> getAllSales() {
+        return ResponseEntity.ok(fixedPriceSaleService.getAllFixedPriceSales());
     }
 
     /**
