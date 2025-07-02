@@ -43,6 +43,7 @@ public class ExhibitionController {
 
     @GetMapping
     public ResponseEntity<List<ExhibitionDto>> getExhibitions(@RequestParam(name="authorId",required = false) Long authorId) {
+
         if (authorId != null) {
             return ResponseEntity.ok(exhibitionService.getExhibitionsByAuthor(authorId));
         } else {
@@ -54,5 +55,10 @@ public class ExhibitionController {
     @GetMapping("/by-ids")
     public ResponseEntity<List<ExhibitionDto>> getExhibitionsByIds(@RequestParam("ids") List<Long> ids) {
         return ResponseEntity.ok(exhibitionService.getExhibitionsByIds(ids));
+    }
+
+    @GetMapping("/subscribed")
+    public ResponseEntity<List<ExhibitionDto>> getSubscribedExhibitions() {
+        return ResponseEntity.ok(exhibitionService.getExhibitionsBySubscribedArtists());
     }
 }

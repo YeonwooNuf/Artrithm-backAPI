@@ -189,6 +189,16 @@ public class ExhibitionService {
                 .collect(Collectors.toList());
     }
 
+    // 구독 서비스에 가입한 작가의 전시만 필터링
+    public List<ExhibitionDto> getExhibitionsBySubscribedArtists() {
+        List<User> subscribedArtists = userRepository.findSubscribedArtists(); // isActive = true
+        List<Long> artistIds = subscribedArtists.stream().map(User::getId).toList();
+
+        return exhibitionRepository.findByAuthorIdIn(artistIds).stream()
+                .map(ExhibitionDto::fromEntity)
+                .toList();
+    }
+
     private ExhibitionDto toDto(Exhibition exhibition) {
         return ExhibitionDto.fromEntity(exhibition);
     }
