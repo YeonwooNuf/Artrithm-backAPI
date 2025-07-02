@@ -42,7 +42,7 @@ public class ExhibitionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExhibitionDto>> getExhibitions(@RequestParam(required = false) Long authorId) {
+    public ResponseEntity<List<ExhibitionDto>> getExhibitions(@RequestParam(name="authorId",required = false) Long authorId) {
         if (authorId != null) {
             return ResponseEntity.ok(exhibitionService.getExhibitionsByAuthor(authorId));
         } else {
@@ -52,7 +52,7 @@ public class ExhibitionController {
 
     // 전시 ID 목록으로 여러 전시 조회
     @GetMapping("/by-ids")
-    public ResponseEntity<List<ExhibitionDto>> getExhibitionsByIds(@RequestParam List<Long> ids) {
+    public ResponseEntity<List<ExhibitionDto>> getExhibitionsByIds(@RequestParam("ids") List<Long> ids) {
         return ResponseEntity.ok(exhibitionService.getExhibitionsByIds(ids));
     }
 }

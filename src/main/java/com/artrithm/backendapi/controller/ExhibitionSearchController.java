@@ -16,7 +16,7 @@ public class ExhibitionSearchController {
 
     // ✅ 실시간 검색 (키워드 기반)
     @GetMapping
-    public List<ExhibitionDocument> search(@RequestParam String query) {
+    public List<ExhibitionDocument> search(@RequestParam("query") String query) {
         return searchService.search(query);
     }
 
