@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -19,6 +19,8 @@ public class FixedPriceArtworkDto {
     private Integer price;
     private Long exhibitionId;
 
-    private Long sellerUserId;  //
+    private Long sellerUserId;
     private Long buyerUserId;   // (nullable)
+    private String sellerNickname;
+    private LocalDateTime createdAt;  // 판매 등록일
 }
