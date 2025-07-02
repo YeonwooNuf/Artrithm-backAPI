@@ -3,6 +3,7 @@ package com.artrithm.backendapi.dto;
 import lombok.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -23,7 +24,12 @@ public class ArtistDisplayDto {
                 .name(a.getName())
                 .bio(a.getBio())
                 .profileImage(a.getProfileImage())
-                .artworks(a.getArtworks())
+                .artworks(
+                        a.getArtworks() == null ? null :
+                                a.getArtworks().stream()
+                                        .filter(art -> "UNSOLD".equals(art.getSaleStatus()))
+                                        .collect(Collectors.toList())
+                )
                 .type("ARTIST")
                 .build();
     }
@@ -34,7 +40,12 @@ public class ArtistDisplayDto {
                 .name(u.getNickname())
                 .bio(u.getArtistBio())
                 .profileImage(u.getProfileImage())
-                .artworks(u.getArtworks())
+                .artworks(
+                        u.getArtworks() == null ? null :
+                                u.getArtworks().stream()
+                                        .filter(art -> "UNSOLD".equals(art.getSaleStatus()))
+                                        .collect(Collectors.toList())
+                )
                 .type("USER")
                 .build();
     }

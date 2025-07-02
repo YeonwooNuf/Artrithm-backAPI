@@ -42,7 +42,8 @@ public class ExhibitionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExhibitionDto>> getExhibitions(@RequestParam(name = "authorId", required = false) Long authorId) {
+    public ResponseEntity<List<ExhibitionDto>> getExhibitions(@RequestParam(name="authorId",required = false) Long authorId) {
+
         if (authorId != null) {
             return ResponseEntity.ok(exhibitionService.getExhibitionsByAuthor(authorId));
         } else {

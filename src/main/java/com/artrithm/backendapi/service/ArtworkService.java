@@ -2,6 +2,7 @@ package com.artrithm.backendapi.service;
 
 import com.artrithm.backendapi.dto.ArtworkDto;
 import com.artrithm.backendapi.model.Artwork;
+import com.artrithm.backendapi.model.SaleStatus;
 import com.artrithm.backendapi.repository.ArtworkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
@@ -95,4 +96,11 @@ public class ArtworkService {
                 .imageUrl(artwork.getImageUrl())
                 .build();
     }
+
+    public List<ArtworkDto> getMyUnsoldArtworks(Long userId) {
+        return artworkRepository.findByUserIdAndSaleStatus(userId, SaleStatus.UNSOLD).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
 }

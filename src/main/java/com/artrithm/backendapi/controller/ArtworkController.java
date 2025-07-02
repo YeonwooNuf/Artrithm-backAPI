@@ -52,4 +52,10 @@ public class ArtworkController {
         List<ArtworkDto> artworks = artworkService.getAllMyArtworks(userId);
         return ResponseEntity.ok(artworks);
     }
+
+    @GetMapping("/my/unsold/{userId}")
+    public ResponseEntity<List<ArtworkDto>> getMyUnsoldArtworks(@PathVariable("userId") Long userId) {
+        List<ArtworkDto> artworks = artworkService.getMyUnsoldArtworks(userId);
+        return ResponseEntity.ok(artworks);
+    }
 }

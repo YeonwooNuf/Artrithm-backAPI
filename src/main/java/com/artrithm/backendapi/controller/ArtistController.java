@@ -2,8 +2,10 @@ package com.artrithm.backendapi.controller;
 
 import com.artrithm.backendapi.dto.ArtistDisplayDto;
 import com.artrithm.backendapi.dto.ArtistDto;
+import com.artrithm.backendapi.dto.ArtworkDto;
 import com.artrithm.backendapi.dto.UserDto;
 import com.artrithm.backendapi.service.ArtistService;
+import com.artrithm.backendapi.service.ArtworkService;
 import com.artrithm.backendapi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,6 +25,7 @@ public class ArtistController {
 
     private final ArtistService artistService;
     private final UserService userService;
+    private final ArtworkService artworkService;
 
     // ✅ 전체 작가 목록 조회
     @GetMapping
@@ -75,4 +78,7 @@ public class ArtistController {
                 userDtos.stream().map(ArtistDisplayDto::fromUserDto)
         ).toList();
     }
+
+
+
 }
