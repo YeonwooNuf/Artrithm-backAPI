@@ -2,6 +2,9 @@ package com.artrithm.backendapi.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "fixed_price_sale")
@@ -38,4 +41,8 @@ public class FixedPriceSale {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id")
     private Payment payment;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 }
