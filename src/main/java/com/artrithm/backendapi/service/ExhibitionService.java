@@ -70,8 +70,6 @@ public class ExhibitionService {
             }
         }
 
-        exhibition.getArtworks().clear();
-
         int workIndex = 0;
         while (true) {
             String workTitle = request.getParameter("works[" + workIndex + "].title");
