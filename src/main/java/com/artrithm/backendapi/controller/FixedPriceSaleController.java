@@ -32,4 +32,12 @@ public class FixedPriceSaleController {
         fixedPriceSaleService.registerFixedPriceSale(dto.getArtworkId(), dto.getPrice(), dto.getSellerUserId());
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{artworkId}")
+    public ResponseEntity<FixedPriceArtworkDto> getFixedPriceSale(@PathVariable Long artworkId) {
+        FixedPriceArtworkDto dto = fixedPriceSaleService.getSaleByArtworkId(artworkId);
+        return ResponseEntity.ok(dto);
+    }
+
+
 }
