@@ -1,6 +1,7 @@
 package com.artrithm.backendapi.service;
 
 import com.artrithm.backendapi.dto.FixedPriceArtworkDto;
+import com.artrithm.backendapi.dto.FixedPriceSaleDto;
 import com.artrithm.backendapi.model.Artwork;
 import com.artrithm.backendapi.model.FixedPriceSale;
 import com.artrithm.backendapi.model.SaleStatus;
@@ -85,4 +86,29 @@ public class FixedPriceSaleService {
 
         return result;
     }
+
+    // 작품 아이디로 개별 정보 불러오기
+    public FixedPriceArtworkDto getSaleByArtworkId(Long artworkId) {
+        FixedPriceSale sale = fixedPriceSaleRepository.findByArtworkId(artworkId)
+                .orElseThrow(() -> new RuntimeException("해당 작품의 판매 정보가 없습니다."));
+
+        Artwork artwork = sale.getArtwork();
+
+        FixedPriceArtworkDto dto = new FixedPriceArtworkDto();
+        dto.setArtworkId(artwork.getId());
+        dto.setArtworkTitle(artwork.getTitle());
+        dto.setArtworkImageUrl(artwork.getImageUrl());
+        dto.setDescription(artwork.getDescription());
+        dto.setPrice(sale.getPrice());
+        dto.setExhibitionId(artwork.getExhibition().getId());
+        dto.setSellerUserId(sale.getSeller().getId());
+        dto.setBuyerUserId(sale.getBuyer() != null ? sale.getBuyer().getId() : null);
+        dto.setSellerNickname(sale.getSeller().getNickname());
+        dto.setCreatedAt(sale.getCreatedAt());
+        dto.setFixedPriceSaleId(sale.getId());
+
+        return dto;
+    }
+
+
 }

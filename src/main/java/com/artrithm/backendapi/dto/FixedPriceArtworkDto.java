@@ -23,4 +23,6 @@ public class FixedPriceArtworkDto {
     private Long buyerUserId;   // (nullable)
     private String sellerNickname;
     private LocalDateTime createdAt;  // 판매 등록일
+
+    private Long fixedPriceSaleId;
 }
