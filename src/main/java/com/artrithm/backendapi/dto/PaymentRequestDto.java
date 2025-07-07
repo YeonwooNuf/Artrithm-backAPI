@@ -18,6 +18,8 @@ public class PaymentRequestDto {
 
     // 옵션
     private Long cartOrderId;
+    // 단일 작품 구매용 (cartOrderId 없이 처리할 경우 필요)
+    private SingleArtworkDto singleArtwork;
     private Long tierId;
     private Boolean isYearly;
 
