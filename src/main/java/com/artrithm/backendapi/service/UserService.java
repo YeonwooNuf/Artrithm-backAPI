@@ -9,7 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,6 +35,9 @@ public class UserService {
         }
 
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
+        String profileImagePath = (dto.getProfileImage() == null || dto.getProfileImage().isBlank())
+                ? "/uploads/profile-images/default-profile.jpg"
+                : dto.getProfileImage();
 
         User user = User.builder()
                 .loginId(dto.getLoginId())
@@ -45,6 +47,7 @@ public class UserService {
                 .email(dto.getEmail())
                 .phoneNumber(dto.getPhoneNumber())
                 .role(User.Role.USER)
+                .profileImage(profileImagePath) // 기본 프로필 사진 적용
                 .build();
 
         return userRepository.save(user).getId();
@@ -58,7 +61,6 @@ public class UserService {
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
-        System.out.println("dfdfdfdf");
 
         return UserDto.builder()
                 .id(user.getId())
@@ -144,9 +146,11 @@ public class UserService {
     }
 
     // 작가 유저만 가져오기
-    public List<UserDto> getAllApprovedUserArtists(){
+    public List<UserDto> getAllApprovedUserArtists() {
         List<User> approvedUsers = userRepository.findByIsArtistApprovedTrue();
-        return approvedUsers.stream().map(user -> UserDto.builder()
+        return approvedUsers.stream()
+                .filter(user -> !user.getRole().equals(User.Role.ADMIN))
+                .map(user -> UserDto.builder()
                         .id(user.getId())
                         .nickname(user.getNickname())
                         .artistBio(user.getArtistBio())

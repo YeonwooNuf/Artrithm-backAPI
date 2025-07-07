@@ -2,7 +2,6 @@ package com.artrithm.backendapi.controller;
 
 import com.artrithm.backendapi.dto.ArtistDisplayDto;
 import com.artrithm.backendapi.dto.ArtistDto;
-import com.artrithm.backendapi.dto.ArtworkDto;
 import com.artrithm.backendapi.dto.UserDto;
 import com.artrithm.backendapi.service.ArtistService;
 import com.artrithm.backendapi.service.ArtworkService;
@@ -78,7 +77,4 @@ public class ArtistController {
                 userDtos.stream().map(ArtistDisplayDto::fromUserDto)
         ).toList();
     }
-
-
-
 }
