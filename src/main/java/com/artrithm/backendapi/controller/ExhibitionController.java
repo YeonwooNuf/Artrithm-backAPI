@@ -25,10 +25,10 @@ public class ExhibitionController {
         return ResponseEntity.ok("전시가 성공적으로 업로드되었습니다.");
     }
 
-    // ✅ 단일 전시 상세 조회
+    // ✅ 단일 전시 상세 조회 + 조회수 증가
     @GetMapping("/{id}")
     public ResponseEntity<ExhibitionDto> getExhibition(@PathVariable Long id) {
-        return ResponseEntity.ok(exhibitionService.getExhibitionById(id));
+        return ResponseEntity.ok(exhibitionService.getExhibitionWithViewIncrease(id));
     }
 
     // ✅ 전시 수정 (multipart/form-data 기반 PUT 처리)
@@ -42,7 +42,7 @@ public class ExhibitionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExhibitionDto>> getExhibitions(@RequestParam(name="authorId",required = false) Long authorId) {
+    public ResponseEntity<List<ExhibitionDto>> getExhibitions(@RequestParam(name = "authorId", required = false) Long authorId) {
 
         if (authorId != null) {
             return ResponseEntity.ok(exhibitionService.getExhibitionsByAuthor(authorId));
