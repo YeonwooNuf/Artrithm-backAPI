@@ -16,7 +16,7 @@ public class ElasticsearchReindexController {
 
     @PostMapping("/reindex")
     public ResponseEntity<String> reindexAllExhibitions() {
-        exhibitionIndexer.reindexAllExhibitions();
+        exhibitionIndexer.deleteAllAndReindex();
         return ResponseEntity.ok("✅ 모든 전시 데이터가 Elasticsearch에 재색인되었습니다.");
     }
 }
