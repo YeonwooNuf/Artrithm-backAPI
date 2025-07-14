@@ -55,4 +55,7 @@ public class Exhibition {
 
     @OneToMany(mappedBy = "exhibition", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Guestbook> guestbook;
+
+    @Column(nullable = false)
+    private Long viewCount = 0L; // 기본값 0
 }
