@@ -3,6 +3,7 @@ package com.artrithm.backendapi.service;
 import com.artrithm.backendapi.dto.ExhibitionDto;
 import com.artrithm.backendapi.model.*;
 import com.artrithm.backendapi.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -129,6 +130,7 @@ public class ExhibitionService {
                 .theme(theme)
                 .thumbnailUrl(thumbnailUrl)
                 .keywords(keywordEntities)
+                .viewCount(0L)
                 .build();
 
         String artistIdStr = request.getParameter("artistId");
@@ -195,6 +197,16 @@ public class ExhibitionService {
         return exhibitionRepository.findByAuthorIdIn(artistIds).stream()
                 .map(ExhibitionDto::fromEntity)
                 .toList();
+    }
+
+    // 조회수 증가 메소드
+    @Transactional
+    public ExhibitionDto getExhibitionWithViewIncrease(Long id) {
+        Exhibition exhibition = exhibitionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Exhibition not found"));
+
+        exhibition.setViewCount(exhibition.getViewCount() + 1);
+        return ExhibitionDto.fromEntity(exhibition); // 또는 기존 방식 유지
     }
 
     private ExhibitionDto toDto(Exhibition exhibition) {
