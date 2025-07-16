@@ -16,7 +16,11 @@ public class ExhibitionIndexer {
     private final ExhibitionRepository exhibitionRepository;
     private final ExhibitionSearchRepository searchRepository;
 
-    public void reindexAllExhibitions() {
+    public void deleteAllAndReindex() {
+        // 1. 기존 Elasticsearch 색인 데이터 모두 삭제
+        searchRepository.deleteAll();
+
+        // 2. MySQL에서 전체 전시 가져와 다시 색인
         List<Exhibition> exhibitions = exhibitionRepository.findAll();
         List<ExhibitionDocument> docs = exhibitions.stream()
                 .map(this::toDocument)
