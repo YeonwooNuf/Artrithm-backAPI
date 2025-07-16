@@ -34,6 +34,8 @@ public class ExhibitionDto {
     // ✅ 명화 전시일 경우에만 존재
     private ArtistDto artistInfo;
 
+    private Long viewCount;
+
     public static ExhibitionDto fromEntity(Exhibition exhibition) {
         return ExhibitionDto.builder()
                 .id(exhibition.getId())
@@ -71,6 +73,7 @@ public class ExhibitionDto {
                                 ? ArtistDto.fromEntity(exhibition.getArtist())
                                 : null
                 )
+                .viewCount(exhibition.getViewCount())
                 .build();
     }
 
