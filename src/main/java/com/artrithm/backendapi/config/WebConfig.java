@@ -12,7 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
                 .allowedOrigins("http://localhost:5173", "http://192.168.0.56:5173",
-                        "http://172.30.1.54:5173", "http://192.168.10.159:5173")
+                        "http://172.30.1.54:5173", "http://192.168.10.159:5173", "http://172.30.1.74:5173", "http://192.168.0.105:5173")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowCredentials(true); // 세션 쿠키 허용
     }
