@@ -3,6 +3,7 @@ package com.artrithm.backendapi.service;
 import com.artrithm.backendapi.dto.PaymentDto;
 import com.artrithm.backendapi.dto.PaymentReceiptDto;
 import com.artrithm.backendapi.dto.PaymentRequestDto;
+import com.artrithm.backendapi.dto.SingleArtworkDto;
 import com.artrithm.backendapi.model.*;
 import com.artrithm.backendapi.repository.*;
 import jakarta.transaction.Transactional;
@@ -32,7 +33,15 @@ public class PaymentService {
 
         return switch (type) {
             case SUBSCRIPTION -> handleSubscriptionPayment(dto);
-            case FIXED_ORDER, AUCTION_ORDER -> handleCartOrderPayment(dto);
+            case FIXED_ORDER, AUCTION_ORDER -> {
+                if (dto.getCartOrderId() != null) {
+                    yield handleCartOrderPayment(dto);
+                } else if (dto.getSingleArtwork() != null) {
+                    yield handleSingleArtworkPayment(dto);
+                } else {
+                    throw new IllegalArgumentException("FIXED_ORDER 결제에는 cartOrderId 또는 singleArtwork가 필요합니다.");
+                }
+            }
             case PENALTY -> handlePenaltyPayment(dto);
         };
     }
@@ -189,5 +198,43 @@ public class PaymentService {
         }
 
         return baseDto;
+    }
+
+    private PaymentDto handleSingleArtworkPayment(PaymentRequestDto dto) {
+        SingleArtworkDto single = dto.getSingleArtwork();
+
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+
+        Artwork artwork = artworkRepository.findById(single.getArtworkId())
+                .orElseThrow(() -> new IllegalArgumentException("작품 없음"));
+
+        FixedPriceSale sale = fixedPriceSaleRepository.findById(single.getFixedPriceSaleId())
+                .orElseThrow(() -> new IllegalArgumentException("지정가 정보 없음"));
+
+        // CartOrder 생성
+        CartOrder cartOrder = CartOrder.builder()
+                .user(user)
+                .orderedAt(LocalDateTime.now())
+                .totalAmount(sale.getPrice())
+                .build();
+        cartOrderRepository.save(cartOrder);
+
+        // CartOrderItem 생성
+        CartOrderItem orderItem = CartOrderItem.builder()
+                .cartOrder(cartOrder)
+                .artwork(artwork)
+                .type(CartItemType.FIXED_PRICE)
+                .price(sale.getPrice())
+                .fixedPriceSale(sale)
+                .cartItemId(null)
+                .build();
+        cartOrderItemRepository.save(orderItem);
+
+        cartOrder.setItems(List.of(orderItem));
+
+        // 기존 로직 재사용
+        dto.setCartOrderId(cartOrder.getId());
+        return handleCartOrderPayment(dto);
     }
 }
