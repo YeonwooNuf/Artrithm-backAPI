@@ -6,8 +6,9 @@ import com.artrithm.backendapi.model.SaleStatus;
 import com.artrithm.backendapi.repository.ArtworkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -37,7 +38,7 @@ public class ArtworkService {
         java.nio.file.Files.write(java.nio.file.Paths.get(targetPath), file.getBytes());
 
         // ✅ FastAPI 서버에 PDF 전송 (멀티파트 POST)
-        String fastapiUrl = "http://localhost:8000/api/artchat/upload";
+        String fastapiUrl = "http://192.168.0.9:8000/api/artchat/upload";
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("artworkId", artworkId.toString());
@@ -89,7 +90,7 @@ public class ArtworkService {
                 .collect(Collectors.toList());
     }
 
-    private ArtworkDto convertToDto(Artwork artwork){
+    private ArtworkDto convertToDto(Artwork artwork) {
         return ArtworkDto.builder()
                 .id(artwork.getId())
                 .title(artwork.getTitle())
