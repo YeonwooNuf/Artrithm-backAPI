@@ -21,6 +21,7 @@ HELP.md
 *.env
 application-local.yml
 application-dev.yml
+application.properties
 
 # 로그 파일
 *.log
@@ -34,3 +35,4 @@ lombok.config
 
 # 테스트 결과
 /test-output/
+src/main/resources/application.properties

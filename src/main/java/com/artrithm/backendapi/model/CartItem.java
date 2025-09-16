@@ -1,0 +1,42 @@
+package com.artrithm.backendapi.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class CartItem {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "artwork_id", nullable = false)
+    private Artwork artwork;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CartItemType type; // FIXED_PRICE or AUCTION
+
+    @Column(nullable = false)
+    private LocalDateTime addedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fixed_price_sale_id")
+    private FixedPriceSale fixedPriceSale;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "auction_id")
+    private Auction auction;
+}
